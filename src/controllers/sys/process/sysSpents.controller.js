@@ -165,14 +165,12 @@ const genBulkMovAccountErp = async (pool, idSpent, gastoXPagarCuentaEgresoErp) =
     return bulkDocumentsToErp;
 
   } catch (error) {
-    console.log("error genBulkMovAccountErp");
-    console.log(error.message);
     return res.status(500).json({ success: false, error: 'Internal Server Error', error: error.message });
   }
 }
 
-const createSpent = async (req, res) => {  
-  console.log('createSpent'); 
+const createSpent = async (req, res) => {
+  
   try {  
     const registerSchema = Joi.object({
       id_persona_proveedor: Joi.number().required(),
@@ -259,14 +257,9 @@ const createSpent = async (req, res) => {
     });
 
     if(apiKeyERP){
-      console.log('AQUI', JSON.stringify({
+      await instance.post(`bulk-documentos`,JSON.stringify({
         "documento": bulkMovAccountErp
       }));
-      let bulkInsertAccountDocumentsERP = await instance.post(`bulk-documentos`,JSON.stringify({
-        "documento": bulkMovAccountErp
-      }));
-
-      console.log('bulkInsertAccountDocumentsERP: ',bulkInsertAccountDocumentsERP);
     }
 
     let spentConcept = rows;
@@ -289,7 +282,8 @@ const createSpent = async (req, res) => {
   }
 };
 
-const putSpent = async (req, res) => {    
+const putSpent = async (req, res) => {
+   
   try { 
     const registerSchema = Joi.object({
       consecutivo: Joi.number().required(),
@@ -416,6 +410,7 @@ const putSpent = async (req, res) => {
 };
 
 const putSpentState = async (req, res) => {
+  
   try {
     const registerSchema = Joi.object({
       anulado: Joi.number().required(),
@@ -459,7 +454,8 @@ const putSpentState = async (req, res) => {
   }
 };
 
-const deleteSpent = async (req, res) => { 
+const deleteSpent = async (req, res) => {
+  
   try {
     const registerSchema = Joi.object({
       id: Joi.number().required()
@@ -489,14 +485,22 @@ const deleteSpent = async (req, res) => {
 
     //DELETE SPENT
     let [token_erp] = await pool.query(`SELECT token_erp FROM gastos WHERE id = ?`,[id]);
-    token_erp = token_erp[0].token_erp;
+    token_erp = [{"token" : token_erp[0].token_erp}];
+
+    const instance = axios.create({
+			baseURL: `${process.env.URL_API_ERP}`,
+			headers: {
+				'Authorization': apiKeyERP,
+				'Content-Type': 'application/json'
+			}
+		});
+
+    await instance.post(`bulk-documentos-delete`, JSON.stringify({
+      "documento": token_erp
+    }));
 
     if(oper=='cancel'){
       await pool.query(`UPDATE gastos SET anulado = 1 WHERE id = ?`,[id]);
-      await axios.post(`${process.env.URL_API_ERP}cancel-document?key=${apiKeyERP}`,
-      {
-        token: token_erp
-      });
     
       await genLog({
           module: 'gastos', 
@@ -520,10 +524,6 @@ const deleteSpent = async (req, res) => {
 
       await pool.query(`DELETE t2 FROM gastos t1 LEFT OUTER JOIN gasto_detalle t2 ON t2.id_gasto = t1.id WHERE t1.id = ?`,[id]);
       await pool.query(`DELETE t1 FROM gastos t1 WHERE t1.id = ?`,[id]);
-      await axios.post(`${process.env.URL_API_ERP}delete-bulk-document?key=${apiKeyERP}`,
-      {
-        token: token_erp
-      });
     }
     
     //pool.end();
