@@ -156,7 +156,7 @@ const getCurrentDateTime = ()=>{
 };
 
 const createPayment = async (req, res) => {   
-  console.log('createPayment');
+
   try {  
     const registerSchema = Joi.object({
         id_persona: Joi.number().required(),
@@ -272,17 +272,13 @@ const createPayment = async (req, res) => {
       documento_referencia: ''
     });
 
-    let response = await instance.post(`${process.env.URL_API_ERP}documentos`, JSON.stringify({
+    await instance.post(`${process.env.URL_API_ERP}documentos`, JSON.stringify({
       documento: bulkDocumentsToErp,
       id_comprobante: pagoComprobanteErp,
       consecutivo: actualConsecutive,
       fecha_manual: fecha_pago,
+      token_factura: tokenErp
     }));
-
-    // let response = await axios.post(`${process.env.URL_API_ERP}bulk-document?key=${apiKeyERP}`,
-    // {
-    //   items: JSON.stringify(bulkDocumentsToErp)
-    // });
 
     descriptionAbono = descriptionAbono.join(" | ");
 
@@ -338,6 +334,7 @@ const createPayment = async (req, res) => {
 };
 
 const deletePayment = async (req, res) => {
+
   try {
     const registerSchema = Joi.object({
       id: Joi.number().required()
@@ -365,14 +362,22 @@ const deletePayment = async (req, res) => {
 
     //DELETE PAYMENT
     let [token_erp] = await pool.query(`SELECT token_erp FROM gasto_pagos WHERE id = ?`,[id]);
-    token_erp = token_erp[0].token_erp;
+    token_erp = [{"token" : token_erp[0].token_erp}];
+
+    const instance = axios.create({
+			baseURL: `${process.env.URL_API_ERP}`,
+			headers: {
+				'Authorization': apiKeyERP,
+				'Content-Type': 'application/json'
+			}
+		});
+
+    await instance.post(`bulk-documentos-delete`, JSON.stringify({
+      "documento": token_erp
+    }));
 
     if(oper=='cancel'){
       await pool.query(`UPDATE gasto_pagos SET estado = 0 WHERE id = ?`,[id]);
-      await axios.post(`${process.env.URL_API_ERP}cancel-document?key=${apiKeyERP}`,
-      {
-        token: token_erp
-      });
     
       await genLog({
           module: 'pagos', 
@@ -396,10 +401,6 @@ const deletePayment = async (req, res) => {
       });
 
       await pool.query(`DELETE t1 FROM gasto_pagos t1 WHERE t1.id = ?`,[id]);
-      await axios.post(`${process.env.URL_API_ERP}delete-bulk-document?key=${apiKeyERP}`,
-      {
-        token: token_erp
-      });
     }
 
     //pool.end();
@@ -411,7 +412,6 @@ const deletePayment = async (req, res) => {
 };
 
 const getExtractNit = async (req, res) => {
-  console.log('getExtractNit 444');
   try {
     const registerSchema = Joi.object({
         tercero: Joi.number().required()
@@ -429,8 +429,6 @@ const getExtractNit = async (req, res) => {
 
     let response = await genExtractProvaiderNit(tercero, pool);
         response.success = true;
-
-    console.log('response: ',response);
 
     //pool.end();
 
