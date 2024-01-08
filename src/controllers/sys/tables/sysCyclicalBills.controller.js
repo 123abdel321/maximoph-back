@@ -793,22 +793,17 @@ const processCyclicalBill = async (req, res) => {
 			}
 		});
     
-    // if(tokensToDelete.length){
-    //   let tokensToSendDelete = [];
+    if(tokensToDelete.length && apiKeyERP){
+      let tokensToSendDelete = [];
 
-    //   tokensToDelete.map(rec=>{
-    //     tokensToSendDelete.push(rec.token_erp);
-    //   });
-
-    //   tokensToSendDelete = tokensToSendDelete.join(",");
-
-    //   if(apiKeyERP){
-    //     let bulkDeleteAccountDocumentsERP = await axios.post(`${process.env.URL_API_ERP}delete-bulk-document?key=${apiKeyERP}`,
-    //     {
-    //       token: tokensToSendDelete
-    //     });
-    //   }
-    // }
+      tokensToDelete.map(rec=>{
+        tokensToSendDelete.push({"token" : rec.token_erp});
+      });
+      
+      await instance.post(`bulk-documentos-delete`, JSON.stringify({
+        "documento": tokensToSendDelete
+      }));
+    }
 
     //DELETE EXIST PERIOD - BILL DETAILS
     await pool.query(`DELETE 
@@ -954,7 +949,7 @@ const processCyclicalBill = async (req, res) => {
         valorTotal += (Number(preBill.valor_total)+valorIntereses);
 
         let saldoAnteriorCuenta = 0;
-        console.log('preBillDetails: ',preBillDetails);
+
         preBillDetails.map(billDetail=>{
           if(totalPendienteXCuenta[billDetail.id_cuenta_por_cobrar_erp]){ 
             saldoAnteriorCuenta = totalPendienteXCuenta[billDetail.id_cuenta_por_cobrar_erp];
@@ -968,51 +963,34 @@ const processCyclicalBill = async (req, res) => {
               ('${insertBill.insertId}', '${billDetail.id_inmueble}', '${billDetail.id_concepto_factura}', '${billDetail.cantidad}', '${billDetail.valor_unitario}', '${saldoAnteriorCuenta}', '${billDetail.total}', '${billDetail.tipo_unidad}:  ${billDetail.numero_interno_unidad} ${billDetail.descripcion==null ? '' : billDetail.descripcion}')`);
         });
         
-        // if(preBill.id_usuario){
-        //   await sendFBPushMessageUser(preBill.id_usuario, {
-        //     title: `Nueva cuenta de cobro ${(actualConsecutive+(index))}`,
-        //     body: `Se te ha generado una nueva cuenta de cobro`
-        //   }, pool);
-        // }
-        // console.log('validar');
         billsHisDetailsToInsert.push(`
             INSERT INTO factura_ciclica_historial_detalle (id_factura_ciclica, id_factura, total, created_by)
             VALUES
             ('${headCyclicalHis.insertId}', '${insertBill.insertId}', '${(Number(preBill.valor_total)+valorIntereses)}', '${req.user.id}')`);
       }
     }));
-    // return res.json({success: true, data: []});
-    console.log('desde aqui: ',billsDetailsToInsert);
+
     billsDetailsToInsert = billsDetailsToInsert.join("; ");
     await pool.query(billsDetailsToInsert);
-    console.log('desde aqui 1');
 
     billsHisDetailsToInsert = billsHisDetailsToInsert.join("; ");
     await pool.query(billsHisDetailsToInsert);
-    console.log('desde aqui 2');
     
     await pool.query(`UPDATE factura_ciclica_historial SET valor_total = ? WHERE id = ?`, [valorTotal, headCyclicalHis.insertId]);
-    console.log('desde aqui 3');
     
     //await processEmailsBill(headCyclicalHis.insertId, pool);
     
     //UPDATE TOTAL CYCLICAL HIS
     await pool.query(`UPDATE factura_ciclica_historial t1 SET t1.valor_total = (SELECT SUM(t2.total) FROM factura_ciclica_historial_detalle t2 WHERE t2.id_factura_ciclica = t1.id) WHERE 1=1`);
-    console.log('desde aqui 4');
 
     //UPDATE TOTAL CYCLICAL BILL
     await pool.query(`UPDATE facturas t1 SET t1.valor_total = (SELECT SUM(t2.total) FROM factura_detalles t2 WHERE t2.id_factura = t1.id) WHERE 1=1`);
-    console.log('desde aqui 5');
     
     let bulkMovAccountErp = await genBulkMovAccountErp(pool, headCyclicalHis.insertId);
-    // console.log('bulkMovAccountErp: ',bulkMovAccountErp);
-    console.log('bulkInsertAccountDocumentsERP: ',JSON.stringify({
-      "documento": bulkMovAccountErp
-    }));
-		let bulkInsertAccountDocumentsERP = await instance.post(`bulk-documentos`,JSON.stringify({
+
+		await instance.post(`bulk-documentos`,JSON.stringify({
       "documento": bulkMovAccountErp
 		}));
-    console.log('bulkInsertAccountDocumentsERP: ',bulkInsertAccountDocumentsERP);
 
     periodoFacturacion = await addDateBill(periodoFacturacion);
     
