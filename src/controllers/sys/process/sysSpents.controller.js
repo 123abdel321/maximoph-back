@@ -373,20 +373,26 @@ const putSpent = async (req, res) => {
       name: 'api_key_erp',
       pool: pool
     });
+
+    const instance = axios.create({
+			baseURL: `${process.env.URL_API_ERP}`,
+			headers: {
+				'Authorization': apiKeyERP,
+				'Content-Type': 'application/json'
+			}
+		});
     
     if(apiKeyERP){
       let [token_erp] = await pool.query(`SELECT token_erp FROM gastos WHERE id = ?`,[id_gasto]);
-      token_erp = token_erp[0].token_erp;
+      token_erp = [{"token" : token_erp[0].token_erp}];
 
-      await axios.post(`${process.env.URL_API_ERP}delete-bulk-document?key=${apiKeyERP}`,
-      {
-        token: token_erp
-      });
+      await instance.post(`bulk-documentos-delete`, JSON.stringify({
+        "documento": token_erp
+      }));
 
-      let responseBulk = await axios.post(`${process.env.URL_API_ERP}bulk-document?key=${apiKeyERP}`,
-      {
-        items: JSON.stringify(bulkMovAccountErp)
-      });
+      await instance.post(`bulk-documentos`,JSON.stringify({
+        "documento": bulkMovAccountErp
+      }));
     }
 
     let spentConcept = rows;

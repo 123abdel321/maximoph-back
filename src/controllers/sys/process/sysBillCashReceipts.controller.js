@@ -110,7 +110,7 @@ const createBillCashReceiptProcess = async (data, pool, req) => {
     let tokenErp = await genRandomToken();
 
     let responseExtract = await genExtractCustomerNit(id_tercero_erp, pool, false);
-    console.log('responseExtract: ',responseExtract);
+
     if(Number(valor_recibo)>Number(responseExtract.totalPendiente)&&!cuentaAnticipos){
       return res.status(201).json({ success: false, error: 'El valor del abono es superior al saldo pendiente.' });
     }
@@ -282,11 +282,12 @@ const createBillCashReceiptProcess = async (data, pool, req) => {
       }
     });
 
-    let responseBulk = await instance.post(`${process.env.URL_API_ERP}documentos`, JSON.stringify({
+    await instance.post(`${process.env.URL_API_ERP}documentos`, JSON.stringify({
       documento: bulkDocumentsToErp,
       id_comprobante: (reciboComprobanteErp||1),
       consecutivo: actualConsecutive,
       fecha_manual: fecha_recibo,
+      token_factura: tokenErp
     }));
     
     descriptionAbono = descriptionAbono.join(" | ");
@@ -455,6 +456,14 @@ const deleteBillCashReceipt = async (req, res) => {
       pool: pool
     });
 
+    const instance = axios.create({
+			baseURL: `${process.env.URL_API_ERP}`,
+			headers: {
+				'Authorization': apiKeyERP,
+				'Content-Type': 'application/json'
+			}
+		});
+
     //GET NEW BILL CASH RECEIPT
     const [rows] = await pool.query(`SELECT * FROM factura_recibos_caja WHERE id = ?`, [ id ]);
 
@@ -462,14 +471,14 @@ const deleteBillCashReceipt = async (req, res) => {
     
     //DELETE BILL CASH RECEIPT
     let [token_erp] = await pool.query(`SELECT token_erp FROM factura_recibos_caja WHERE id = ?`,[id]);
-    token_erp = token_erp[0].token_erp;
+    token_erp = [{"token" : token_erp[0].token_erp}];
+
+    await instance.post(`bulk-documentos-delete`, JSON.stringify({
+      "documento": token_erp
+    }));
 
     if(oper=='cancel'){
       await pool.query(`UPDATE factura_recibos_caja SET estado = 0 WHERE id = ?`,[id]);
-      await axios.post(`${process.env.URL_API_ERP}cancel-document?key=${apiKeyERP}`,
-      {
-        token: token_erp
-      });
     
       await genLog({
           module: 'recibos_de_caja', 
@@ -493,10 +502,6 @@ const deleteBillCashReceipt = async (req, res) => {
       });
 
       await pool.query(`DELETE t1 FROM factura_recibos_caja t1 WHERE t1.id = ?`,[id]);
-      await axios.post(`${process.env.URL_API_ERP}delete-bulk-document?key=${apiKeyERP}`,
-      {
-        token: token_erp
-      });
     }
 
     await pool.query(`UPDATE factura_recibo_caja_comprobante SET
