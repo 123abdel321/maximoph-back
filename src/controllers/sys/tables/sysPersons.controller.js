@@ -63,9 +63,8 @@ const getAllPersons = async (req, res) => {
         
         WHERE
               t1.eliminado = 0 
-              ${req.erp ? ' AND (t1.numero_documento!="") ': ''}
+              ${req.erp ? " AND (t1.numero_documento!='') ": ''}
         `);
-
     let access = await getModuleAccess({
       user: req.user.id, 
       client: req.user.id_cliente, 
