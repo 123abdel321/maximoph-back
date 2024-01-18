@@ -63,9 +63,8 @@ const getAllPersons = async (req, res) => {
         
         WHERE
               t1.eliminado = 0 
-              ${req.erp ? ' AND (t1.numero_documento!="") ': ''}
+              ${req.erp ? " AND (t1.numero_documento!='') ": ''}
         `);
-
     let access = await getModuleAccess({
       user: req.user.id, 
       client: req.user.id_cliente, 
@@ -142,7 +141,7 @@ const createPerson = async (req, res) => {
       (id_tercero_erp, id_ciudad_erp, direccion, tipo_documento, numero_documento, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, telefono, celular, email, fecha_nacimiento, sexo, avatar, created_by) 
         VALUES 
       (?, ?, UPPER(?), ?, ?, UPPER(?), UPPER(?), UPPER(?), UPPER(?), ?, ?, UPPER(?), ?, ?, ?, ?)`,
-      [id_tercero_erp, id_ciudad_erp, direccion, (tipo_documento ? tipo_documento : 0), (numero_documento ? numero_documento : ''), primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, telefono, celular, email, (fecha_nacimiento ? fecha_nacimiento : null), sexo, '', req.user.id]
+      [id_tercero_erp, id_ciudad_erp, direccion, (tipo_documento ? tipo_documento : 0), (numero_documento ? numero_documento : ''), primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, (telefono ? telefono : null), null, email, null, sexo, null, req.user.id]
     );
     
     //GET NEW PERSON

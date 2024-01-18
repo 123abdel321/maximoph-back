@@ -38,9 +38,14 @@ const getAllCyclicalBills = async (req, res) => {
     });
 
     const [cyclicalBills] = await pool.query(`SELECT 
-          t1.*,
-          DATE_FORMAT(t1.fecha_inicio,"%Y-%m-%d") AS fecha_inicio,
-          DATE_FORMAT(t1.fecha_fin,"%Y-%m-%d") AS fecha_fin,
+          t1.id_persona as id_persona,
+          t1.id_inmueble as id_inmueble,
+          t1.fecha_inicio as fecha_inicio,
+          t1.fecha_fin as fecha_fin,
+          t1.valor_total as valor_total,
+          t1.observacion as observacion,
+          DATE_FORMAT(t1.fecha_inicio,'%Y-%m-%d') AS fecha_inicio,
+          DATE_FORMAT(t1.fecha_fin,'%Y-%m-%d') AS fecha_fin,
         CONCAT(t3.nombre,' - ',t2.numero_interno_unidad) AS inmuebleText,
         CONCAT(t2.area) AS areaText,
         (IFNULL(t2.coeficiente,0)*100) AS coeficiente,
@@ -76,7 +81,7 @@ const getAllCyclicalBills = async (req, res) => {
         LEFT OUTER JOIN conceptos_facturacion t7 ON t7.id = t6.id_concepto_factura
       WHERE
         ${validateDate?`(DATE_FORMAT(NOW(),'%Y-%m-%d')>=t1.fecha_inicio OR DATE_FORMAT(NOW(),'%Y-%m-%d')<=t1.fecha_fin)`:'1=1'}
-        ${validateDate?`GROUP BY t1.id_persona, t1.id_inmueble`:''}
+        ${validateDate?`GROUP BY id_persona, id_inmueble`:''}
       ORDER BY t1.id ASC
       `);
 
@@ -203,7 +208,7 @@ const getAllCyclicalBills = async (req, res) => {
 
     return res.json({success: true, data: cyclicalBills, totals: totals, exported: doneExported, stricted, periodoFacturacion, access});
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'Internal Server Error', error: error.message });
+    return res.status(500).json({ success: false, error: 'Internal Server Error', error: error });
   }
 };
 
@@ -256,8 +261,8 @@ const createCyclicalBill = async (req, res) => {
     //GET NEW CYCLICAL BILLING
     const [rows] = await pool.query(`SELECT 
       t1.*,
-      DATE_FORMAT(t1.fecha_inicio,"%Y-%m-%d") AS fecha_inicio,
-      DATE_FORMAT(t1.fecha_fin,"%Y-%m-%d") AS fecha_fin,
+      DATE_FORMAT(t1.fecha_inicio,'%Y-%m-%d') AS fecha_inicio,
+      DATE_FORMAT(t1.fecha_fin,'%Y-%m-%d') AS fecha_fin,
       CONCAT(t3.nombre,' - ',t2.numero_interno_unidad) AS inmuebleText,
       t3.nombre AS zonaText,
       (SELECT COUNT(t4.id) FROM factura_ciclica_detalles t4 WHERE t4.id_factura_ciclica = t1.id) AS conceptosText,
@@ -541,8 +546,8 @@ const putCyclicalBill = async (req, res) => {
     //GET EDITED CYCLICAL BILL
     const [rows] = await pool.query(`SELECT 
       t1.*,
-      DATE_FORMAT(t1.fecha_inicio,"%Y-%m-%d") AS fecha_inicio,
-      DATE_FORMAT(t1.fecha_fin,"%Y-%m-%d") AS fecha_fin,
+      DATE_FORMAT(t1.fecha_inicio,'%Y-%m-%d') AS fecha_inicio,
+      DATE_FORMAT(t1.fecha_fin,'%Y-%m-%d') AS fecha_fin,
       CONCAT(t3.nombre,' - ',t2.numero_interno_unidad) AS inmuebleText,
       t3.nombre AS zonaText,
       (SELECT COUNT(t4.id) FROM factura_ciclica_detalles t4 WHERE t4.id_factura_ciclica = t1.id) AS conceptosText,
