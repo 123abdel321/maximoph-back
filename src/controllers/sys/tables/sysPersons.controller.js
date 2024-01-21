@@ -65,6 +65,7 @@ const getAllPersons = async (req, res) => {
               t1.eliminado = 0 
               ${req.erp ? " AND (t1.numero_documento!='') ": ''}
         `);
+
     let access = await getModuleAccess({
       user: req.user.id, 
       client: req.user.id_cliente, 
@@ -434,8 +435,18 @@ const deletePerson = async (req, res) => {
 
 const syncERPPersonInner = async (id, pool, res) => { 
   try {
-    let [existPerson] = await pool.query("SELECT * FROM personas WHERE id = ?", [id]);
-        existPerson = existPerson[0];
+    let [existPerson] = await pool.query(`SELECT
+        P.*,
+        MC.id_erp AS id_ciudad
+      FROM
+        personas P
+        
+      LEFT JOIN erp_maestras MC ON P.id_ciudad_erp = MC.id AND MC.tipo = 3
+      
+      WHERE P.id = ${id}`
+    );
+
+    existPerson = existPerson[0];
     
     let errorSync = [];
 
@@ -451,7 +462,7 @@ const syncERPPersonInner = async (id, pool, res) => {
       errorSync.push("Primer Nombre");
     }
 
-    /*if(existPerson.id_ciudad_erp==""||existPerson.id_ciudad_erp===null){
+    if(existPerson.id_ciudad_erp==""||existPerson.id_ciudad_erp===null){
       errorSync.push("Ciudad");
     }
 
@@ -461,7 +472,7 @@ const syncERPPersonInner = async (id, pool, res) => {
 
     if(existPerson.email==""){
       errorSync.push("E-Mail");
-    }*/
+    }
 
     errorSync = errorSync.join(", ");
 
@@ -501,15 +512,16 @@ const syncERPPersonInner = async (id, pool, res) => {
       "municipio": existPerson.id_ciudad_erp,
       "email": existPerson.email
     };
-
+    
     if(personERP.length == 0){ //CREAR NIT
-			var url = `nit?numero_documento=${existPerson.numero_documento}&id_tipo_documento=${(existPerson.tipo_documento==0 ? 3 : 6)}&tipo_contribuyente=2&id_ciudad=${existPerson.id_ciudad_erp}&primer_apellido=${existPerson.primer_apellido}&segundo_apellido=${existPerson.segundo_apellido}&primer_nombre=${existPerson.primer_nombre}&otros_nombres=${existPerson.segundo_nombre}&razon_social=${existPerson.primer_nombre} ${existPerson.segundo_nombre} ${existPerson.primer_apellido} ${existPerson.segundo_apellido}&direccion=${existPerson.direccion}&email=${existPerson.email}`;
+			var url = `nit?numero_documento=${existPerson.numero_documento}&id_tipo_documento=${(existPerson.tipo_documento==0 ? 3 : 6)}&id_ciudad=${existPerson.id_ciudad}&primer_apellido=${existPerson.primer_apellido}&segundo_apellido=${existPerson.segundo_apellido}&primer_nombre=${existPerson.primer_nombre}&otros_nombres=${existPerson.segundo_nombre}&razon_social=${existPerson.primer_nombre} ${existPerson.segundo_nombre} ${existPerson.primer_apellido} ${existPerson.segundo_apellido}&direccion=${existPerson.direccion}&email=${existPerson.email}`;
+
 			let resultNewPersonERP = await instance.post(url);
 			personERP = resultNewPersonERP.data.data.id;
 		} else { //ACTUALIZAR NIT
 			personERP = personERP[0].id;
-			var url = `nit?id=${personERP}&numero_documento=${existPerson.numero_documento}&id_tipo_documento=${(existPerson.tipo_documento==0 ? 3 : 6)}&tipo_contribuyente=2&id_ciudad=${existPerson.id_ciudad_erp}&primer_apellido=${existPerson.primer_apellido}&segundo_apellido=${existPerson.segundo_apellido}&primer_nombre=${existPerson.primer_nombre}&otros_nombres=${existPerson.segundo_nombre}&razon_social=${existPerson.primer_nombre} ${existPerson.segundo_nombre} ${existPerson.primer_apellido} ${existPerson.segundo_apellido}&direccion=${existPerson.direccion}&email=${existPerson.email}`;
-			let resultNewPersonERP = await instance.put(url);
+			var url = `nit?id=${personERP}&numero_documento=${existPerson.numero_documento}&id_tipo_documento=${(existPerson.tipo_documento==0 ? 3 : 6)}&id_ciudad=${existPerson.id_ciudad}&primer_apellido=${existPerson.primer_apellido}&segundo_apellido=${existPerson.segundo_apellido}&primer_nombre=${existPerson.primer_nombre}&otros_nombres=${existPerson.segundo_nombre}&razon_social=${existPerson.primer_nombre} ${existPerson.segundo_nombre} ${existPerson.primer_apellido} ${existPerson.segundo_apellido}&direccion=${existPerson.direccion}&email=${existPerson.email}`;
+			await instance.put(url);
 		}
 
     if(existPerson.id_tercero_erp===null||existPerson.id_tercero_erp===""){//ACTUALIZAR ID_TERCERO_ERP
