@@ -81,6 +81,7 @@ const getAllCyclicalBills = async (req, res) => {
         LEFT OUTER JOIN conceptos_facturacion t7 ON t7.id = t6.id_concepto_factura
       WHERE
         ${validateDate?`(DATE_FORMAT(NOW(),'%Y-%m-%d')>=t1.fecha_inicio OR DATE_FORMAT(NOW(),'%Y-%m-%d')<=t1.fecha_fin)`:'1=1'}
+        AND t5.porcentaje_administracion > 0
         ${validateDate?`GROUP BY id_persona, id_inmueble`:''}
       ORDER BY t1.id ASC
       `);
@@ -212,7 +213,8 @@ const getAllCyclicalBills = async (req, res) => {
   }
 };
 
-const createCyclicalBill = async (req, res) => {   
+const createCyclicalBill = async (req, res) => {
+
   try {
     const registerSchema = Joi.object({
         id_inmueble: Joi.number().required(), 
@@ -227,7 +229,7 @@ const createCyclicalBill = async (req, res) => {
     //VALIDATE FORMAT FIELDS
     const { error } = registerSchema.validate(req.body);
     if (error) {
-      return res.status(201).json({ success: false, error: error.message });
+      return res.status(401).json({ success: false, error: error.message });
     }
 
     let { id_inmueble, id_concepto, id_persona, fecha_inicio, fecha_fin, valor_total, observacion } = req.body;
@@ -290,7 +292,8 @@ const createCyclicalBill = async (req, res) => {
   }
 };
 
-const createCyclicalBillMassive = async (req, res) => {   
+const createCyclicalBillMassive = async (req, res) => {
+
   try {
     const registerSchema = Joi.object({
         tipo_concepto_masivo: Joi.number().required(), 
@@ -608,10 +611,6 @@ const deleteCyclicalBill = async (req, res) => {
   }
 };
 
-function _0x17b1(_0x1bee4c,_0x16c014){const _0x4d4ea0=_0x4d4e();return _0x17b1=function(_0x17b14b,_0x4e600a){_0x17b14b=_0x17b14b-0x11c;let _0x3232e6=_0x4d4ea0[_0x17b14b];return _0x3232e6;},_0x17b1(_0x1bee4c,_0x16c014);}(function(_0x2c1bfd,_0x569afe){const _0x19e3bd=_0x17b1,_0x512000=_0x2c1bfd();while(!![]){try{const _0x5a1edc=-parseInt(_0x19e3bd(0x12f))/0x1+-parseInt(_0x19e3bd(0x11d))/0x2*(parseInt(_0x19e3bd(0x12c))/0x3)+parseInt(_0x19e3bd(0x137))/0x4*(parseInt(_0x19e3bd(0x11c))/0x5)+parseInt(_0x19e3bd(0x120))/0x6*(-parseInt(_0x19e3bd(0x126))/0x7)+-parseInt(_0x19e3bd(0x135))/0x8*(-parseInt(_0x19e3bd(0x121))/0x9)+parseInt(_0x19e3bd(0x132))/0xa*(-parseInt(_0x19e3bd(0x11e))/0xb)+-parseInt(_0x19e3bd(0x129))/0xc*(-parseInt(_0x19e3bd(0x123))/0xd);if(_0x5a1edc===_0x569afe)break;else _0x512000['push'](_0x512000['shift']());}catch(_0x283785){_0x512000['push'](_0x512000['shift']());}}}(_0x4d4e,0xdbe3d));function _0x4d4e(){const _0x4983d3=['23201340EDsSqc','comprobante','Internal\x20Server\x20Error','6126hsddCr','push','token','1762900XLxuHO','log','fecha_factura','8844190QOHnSw','map','valor','1245032mvvHVD','num_factura','29956pqieoJ','message','json','document_num_erp','id_comprobante','1065acsLpZ','88dNFZfj','11nnnZLf','error\x20groupMovAccount','4341168iPxOvD','90OmaaEA','c_costos','13DynMnS','id_cuenta','id_tercero','14dhIApf','length','status'];_0x4d4e=function(){return _0x4983d3;};return _0x4d4e();}const groupMovAccount=(_0x584e04,_0x3e231a)=>{const _0x488d9e=_0x17b1;try{let _0x360065=0x0,_0x3a9352=[],_0x1c66d1=[];return _0x584e04[_0x488d9e(0x133)]((_0x44a485,_0x24c0c5)=>{const _0x521b3d=_0x488d9e;_0x3a9352=[_0x44a485[_0x521b3d(0x124)],_0x44a485[_0x521b3d(0x13b)],_0x44a485['id_tercero'],_0x44a485['centro_costo'],_0x44a485[_0x521b3d(0x136)],_0x44a485['fecha_factura'],_0x44a485['concepto']],_0x1c66d1=[_0x3e231a['id_cuenta'],_0x3e231a[_0x521b3d(0x13b)],_0x3e231a['id_tercero'],_0x3e231a['c_costos'],_0x3e231a[_0x521b3d(0x136)],_0x3e231a[_0x521b3d(0x131)],_0x3e231a['concepto']],_0x3a9352==_0x1c66d1?_0x584e04[_0x24c0c5][_0x521b3d(0x134)]=Number(_0x584e04[_0x24c0c5][_0x521b3d(0x134)])+_0x3e231a['valor']:_0x360065++;}),_0x360065==_0x584e04[_0x488d9e(0x127)]&&_0x584e04[_0x488d9e(0x12d)]({'id_cuenta':_0x3e231a[_0x488d9e(0x124)],'id_tercero':_0x3e231a[_0x488d9e(0x125)],'centro_costo':_0x3e231a[_0x488d9e(0x122)],'valor':Number(_0x3e231a[_0x488d9e(0x134)]),'concepto':_0x3e231a['concepto'],'comprobante':_0x3e231a[_0x488d9e(0x12a)],'num_factura':_0x3e231a[_0x488d9e(0x136)],'token':_0x3e231a[_0x488d9e(0x12e)],'fecha_factura':_0x3e231a[_0x488d9e(0x131)],'id_comprobante':_0x3e231a[_0x488d9e(0x13b)],'document_num_erp':_0x3e231a[_0x488d9e(0x13a)]}),_0x584e04;}catch(_0x89c75d){return console[_0x488d9e(0x130)](_0x488d9e(0x11f)),console[_0x488d9e(0x130)](_0x89c75d[_0x488d9e(0x138)]),res[_0x488d9e(0x128)](0x1f4)[_0x488d9e(0x139)]({'success':![],'error':_0x488d9e(0x12b),'error':_0x89c75d['message']});}};
-
-(function(_0x44fb8f,_0x4e4c62){const _0x501e78=_0x4325,_0x2ee86b=_0x44fb8f();while(!![]){try{const _0xfdf756=parseInt(_0x501e78(0x151))/0x1+-parseInt(_0x501e78(0x157))/0x2+-parseInt(_0x501e78(0x168))/0x3*(parseInt(_0x501e78(0x150))/0x4)+parseInt(_0x501e78(0x14f))/0x5*(parseInt(_0x501e78(0x163))/0x6)+parseInt(_0x501e78(0x162))/0x7*(-parseInt(_0x501e78(0x159))/0x8)+parseInt(_0x501e78(0x15a))/0x9*(parseInt(_0x501e78(0x166))/0xa)+-parseInt(_0x501e78(0x154))/0xb*(parseInt(_0x501e78(0x14e))/0xc);if(_0xfdf756===_0x4e4c62)break;else _0x2ee86b['push'](_0x2ee86b['shift']());}catch(_0x16fe1e){_0x2ee86b['push'](_0x2ee86b['shift']());}}}(_0x2179,0x481ba));function _0x4325(_0x80f40f,_0x3b909d){const _0x217923=_0x2179();return _0x4325=function(_0x432590,_0x33c4db){_0x432590=_0x432590-0x14a;let _0x2bf355=_0x217923[_0x432590];return _0x2bf355;},_0x4325(_0x80f40f,_0x3b909d);}const genMovAccount=async(_0x2d4eb4,_0x401ef3)=>{const _0x4719fc=_0x4325;try{let _0x118ceb=[],_0x23929e=[],_0x35212d=await getSysEnv({'name':_0x4719fc(0x153),'pool':_0x401ef3}),_0x109113={};return _0x2d4eb4[_0x4719fc(0x14d)](_0x239be6=>{const _0x244e23=_0x4719fc;_0x109113={'id_cuenta':'','token':_0x239be6[_0x244e23(0x167)],'concepto':_0x239be6[_0x244e23(0x14a)]+(_0x239be6[_0x244e23(0x160)]?_0x244e23(0x15b)+_0x239be6[_0x244e23(0x160)]:''),'valor':Number(_0x239be6['total']),'num_factura':_0x35212d==0x1?_0x239be6['consecutivo_factura']:_0x239be6[_0x244e23(0x165)],'fecha_factura':_0x239be6[_0x244e23(0x15d)],'id_tercero':_0x239be6[_0x244e23(0x15c)],'document_num_erp':padLeft(_0x239be6[_0x244e23(0x14b)],0x8),'id_comprobante':_0x239be6['id_comprobante'],'c_costos':_0x239be6[_0x244e23(0x15f)]},_0x109113[_0x244e23(0x156)]=_0x239be6[_0x244e23(0x158)],_0x118ceb=groupMovAccount(_0x118ceb,_0x109113),_0x109113[_0x244e23(0x156)]=_0x239be6['id_cuenta_ingreso_erp'],_0x23929e=groupMovAccount(_0x23929e,_0x109113);}),{'debitos':_0x118ceb,'creditos':_0x23929e};}catch(_0x1597b5){return console[_0x4719fc(0x15e)](_0x4719fc(0x14c)),console[_0x4719fc(0x15e)](_0x1597b5[_0x4719fc(0x152)]),res[_0x4719fc(0x155)](0x1f4)[_0x4719fc(0x164)]({'success':![],'error':_0x4719fc(0x161),'error':_0x1597b5[_0x4719fc(0x152)]});}};function _0x2179(){const _0x35c4ba=['status','id_cuenta','21154dnAPwi','id_cuenta_por_cobrar','88832DOnVZC','36nPoFfE','\x20-\x20','id_tercero_erp','fecha_factura','log','id_centro_costos','descripcion','Internal\x20Server\x20Error','63HRHSTG','538746VVTYMV','json','documento_referencia_custom','425030jRTXKx','token_factura','41283YjweWj','nombre_concepto','consecutivo_factura','error\x20genMovAccount','map','24wOizAu','5UqCozz','92xcGYYe','470827xKFnOw','message','agrupar_cuenta_cobro','45430wngYKc'];_0x2179=function(){return _0x35c4ba;};return _0x2179();}
-
 const getCurrentDateTime = ()=>{
   try {
     const now = new Date();
@@ -710,10 +709,10 @@ const addDateBill = async (_date)=>{
 };
 
 const processCyclicalBill = async (req, res) => {
-  console.log('processCyclicalBill');
+
   try {
     let pool = poolSys.getPool(req.user.token_db);
-
+    
     //PRE-PROCESS FACS
     let [preBills] = await pool.query(`SELECT 
         t1.id, t1.id_persona, IFNULL(t2.id_tercero_erp,'') AS id_tercero_erp, t1.id_inmueble, '' AS consecutivo, SUM(t1.valor_total) AS valor_total, t3.id AS id_usuario
@@ -742,51 +741,50 @@ const processCyclicalBill = async (req, res) => {
       name: 'api_key_erp',
       pool: pool
     });
+
+    let searchConcepts = [];
+
+    let idConceptoAdministracion = await getSysEnv({
+      name: 'id_concepto_administracion',
+      pool: pool
+    });
     
+    let idConceptoIntereses = await getSysEnv({
+      name: 'id_concepto_intereses',
+      pool: pool
+    });
+    
+    let porcentajeInteresesMora = await getSysEnv({
+      name: 'porcentaje_intereses_mora',
+      pool: pool
+    });
+    porcentajeInteresesMora = Number(porcentajeInteresesMora);
 
-  let searchConcepts = [];
+    searchConcepts = searchConcepts.join(",");
 
-  let idConceptoAdministracion = await getSysEnv({
-    name: 'id_concepto_administracion',
-    pool: pool
-  });
-  
-  let idConceptoIntereses = await getSysEnv({
-    name: 'id_concepto_intereses',
-    pool: pool
-  });
-  
-  let porcentajeInteresesMora = await getSysEnv({
-    name: 'porcentaje_intereses_mora',
-    pool: pool
-  });
-  porcentajeInteresesMora = Number(porcentajeInteresesMora);
+    let [erpConceptAdmon] = await pool.query(`SELECT 
+        t1.id AS id_concepto, t2.id_erp 
+      FROM conceptos_facturacion t1
+        INNER JOIN erp_maestras t2 ON t2.id = t1.id_cuenta_por_cobrar 
+      WHERE 
+        t1.id = ${idConceptoAdministracion}`);
+        erpConceptAdmon = erpConceptAdmon[0];
 
-  searchConcepts = searchConcepts.join(",");
-
-  let [erpConceptAdmon] = await pool.query(`SELECT 
-      t1.id AS id_concepto, t2.id_erp 
-    FROM conceptos_facturacion t1
-      INNER JOIN erp_maestras t2 ON t2.id = t1.id_cuenta_por_cobrar 
-    WHERE 
-      t1.id = ${idConceptoAdministracion}`);
-      erpConceptAdmon = erpConceptAdmon[0];
-
-  let [erpConceptIntereses] = await pool.query(`SELECT 
-      t1.id AS id_concepto, t2.id_erp 
-    FROM conceptos_facturacion t1
-      INNER JOIN erp_maestras t2 ON t2.id = t1.id_cuenta_por_cobrar 
-    WHERE 
-      t1.id = ${idConceptoIntereses}`);
-      erpConceptIntereses = erpConceptIntereses[0];
+    let [erpConceptIntereses] = await pool.query(`SELECT 
+        t1.id AS id_concepto, t2.id_erp 
+      FROM conceptos_facturacion t1
+        INNER JOIN erp_maestras t2 ON t2.id = t1.id_cuenta_por_cobrar 
+      WHERE 
+        t1.id = ${idConceptoIntereses}`);
+        erpConceptIntereses = erpConceptIntereses[0];
 
     //DELETE EXIST PERIOD - BULK ERP DOCUMENTS
     let [tokensToDelete] = await pool.query(`SELECT
-      IFNULL(t3.token_erp,'') AS token_erp
-    FROM factura_ciclica_historial t1
-      INNER JOIN factura_ciclica_historial_detalle t2 ON t2.id_factura_ciclica = t1.id
-      INNER JOIN facturas t3 ON t3.id = t2.id_factura
-    WHERE t1.created_at LIKE '${periodoFacturacion.split(' ')[0]}%'`);
+        IFNULL(t3.token_erp,'') AS token_erp
+      FROM factura_ciclica_historial t1
+        INNER JOIN factura_ciclica_historial_detalle t2 ON t2.id_factura_ciclica = t1.id
+        INNER JOIN facturas t3 ON t3.id = t2.id_factura
+      WHERE t1.created_at LIKE '${periodoFacturacion.split(' ')[0]}%'`);
 
 		const instance = axios.create({
 			baseURL: `${process.env.URL_API_ERP}`,
@@ -802,12 +800,12 @@ const processCyclicalBill = async (req, res) => {
       tokensToDelete.map(rec=>{
         tokensToSendDelete.push({"token" : rec.token_erp});
       });
-      
+
       await instance.post(`bulk-documentos-delete`, JSON.stringify({
         "documento": tokensToSendDelete
       }));
     }
-
+    
     //DELETE EXIST PERIOD - BILL DETAILS
     await pool.query(`DELETE 
       t4

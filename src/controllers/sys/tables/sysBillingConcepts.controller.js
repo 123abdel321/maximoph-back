@@ -36,9 +36,7 @@ const getAllBillingConcepts = async (req, res) => {
       WHERE 
         t1.eliminado = 0
     `);
-
-    console.log('listBillingConcepts: ',listBillingConcepts);
-          
+    
     let access = await getModuleAccess({
       user: req.user.id, 
       client: req.user.id_cliente, 

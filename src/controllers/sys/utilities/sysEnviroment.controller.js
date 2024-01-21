@@ -120,7 +120,7 @@ const getSummaryErp = async (req, res) => {
 };
 
 const getValidateAPIKEYERP = async (req, res) => {
-    console.log('getValidateAPIKEYERP');
+
     try {    
         const pool = poolSys.getPool(req.user.token_db);
 
@@ -155,7 +155,7 @@ const getValidateAPIKEYERP = async (req, res) => {
 const getSyncAPIKEYERP = async (req, res) => {
     try {    
         const registerSchema = Joi.object({
-            origin: Joi.number().valid('cuentas', 'comprobantes', 'centro_costos', 'nits').required()
+            origin: Joi.number().valid('cuentas', 'comprobantes', 'centro_costos', 'nits', 'ciudades').required()
         });
     
         //VALIDATE FORMAT FIELDS
@@ -194,6 +194,9 @@ const getSyncAPIKEYERP = async (req, res) => {
             case "nits":
                 pathERP = 'nit';
                 typeERP = 3;
+            case "ciudades":
+                pathERP = 'ciudades?getall=1';
+                typeERP = 4;
             break;
         }
 
@@ -206,14 +209,23 @@ const getSyncAPIKEYERP = async (req, res) => {
 		});
 
         let dataFromERP = await instance.get(pathERP);
+
             dataFromERP = dataFromERP.data.data;
+
             
-        if(typeERP !=3 ) { //SINCRONIZAR CECOS, CUENTAS, COMRPOBANTES
+        if(typeERP !=3 &&  typeERP !=4) { //SINCRONIZAR CECOS, CUENTAS, COMRPOBANTES
             Object.keys(dataFromERP).forEach((id)=>{
-                let recordERP = dataFromERP[id];
+                var recordERP = dataFromERP[id];
                 updateInsertERP.push(`INSERT INTO erp_maestras (tipo, id_erp, codigo, nombre)
                     VALUES (${typeERP}, '${recordERP.id}', '${recordERP[codeFieldERP]}', '${recordERP.nombre}')
                     ON DUPLICATE KEY UPDATE id_erp = '${recordERP.id}',  codigo = '${recordERP[codeFieldERP]}', nombre = '${recordERP.nombre}'`);
+            });
+        } else if (typeERP == 4){
+            dataFromERP.forEach(async (ciudadesERP) => {
+                
+                updateInsertERP.push(`INSERT INTO erp_maestras (tipo, id_erp, codigo, nombre)
+                    VALUES (3, '${ciudadesERP.id}', '${ciudadesERP.codigo}', '${ciudadesERP.nombre_completo}')
+                    ON DUPLICATE KEY UPDATE id_erp = '${ciudadesERP.id}',  codigo = '${ciudadesERP.codigo}', nombre = '${ciudadesERP.nombre_completo}'`);
             });
         } else {// SINCRONIZAR NITS
             dataFromERP.forEach(async (nitERP) => {
@@ -223,9 +235,9 @@ const getSyncAPIKEYERP = async (req, res) => {
                 });
 
                 if (id_nit) { //ACTUALIZAR SI EXITE NIT 
-                    await pool.query(`UPDATE personas SET id_tercero_erp='${nitERP.id}' WHERE numero_documento='${nitERP.numero_documento}'`);
+                    await updateInsertERP(`UPDATE personas SET id_tercero_erp='${nitERP.id}' WHERE numero_documento='${nitERP.numero_documento}'`);
                 } else { //CREAR SI NO EXISTE NIT
-                    await pool.query(`INSERT INTO personas (id_tercero_erp, tipo_documento, numero_documento, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, telefono, celular, email, direccion, fecha_nacimiento, sexo, avatar, importado) VALUES (${nitERP.id},${nitERP.id_tipo_documento && nitERP.id_tipo_documento != null ? nitERP.id_tipo_documento : "''"},${nitERP.numero_documento && nitERP.numero_documento != null ? nitERP.numero_documento : "''"},${nitERP.primer_nombre && nitERP.primer_nombre != null ? "'"+nitERP.primer_nombre+"'" : "''"},${nitERP.otros_nombres && nitERP.otros_nombres != null ? "'"+nitERP.otros_nombres+"'" : "''"},${nitERP.primer_apellido && nitERP.primer_apellido != null ? "'"+nitERP.primer_apellido+"'" : "''"},${nitERP.segundo_apellido && nitERP.segundo_apellido != null ? "'"+nitERP.segundo_apellido+"'" : "''"},${nitERP.telefono_1 && nitERP.telefono_1 != null ? nitERP.telefono_1 : null},${nitERP.telefono_2 && nitERP.telefono_2 != null ? nitERP.telefono_2 : null},${nitERP.email && nitERP.email != null ? "'"+nitERP.email+"'" : null},${nitERP.direccion && nitERP.direccion != null ? "'"+nitERP.direccion+"'" : null},${null},${null},${null},${null})`);
+                    await updateInsertERP(`INSERT INTO personas (id_tercero_erp, tipo_documento, numero_documento, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, telefono, celular, email, direccion, fecha_nacimiento, sexo, avatar, importado) VALUES (${nitERP.id},${nitERP.id_tipo_documento && nitERP.id_tipo_documento != null ? nitERP.id_tipo_documento : "''"},${nitERP.numero_documento && nitERP.numero_documento != null ? nitERP.numero_documento : "''"},${nitERP.primer_nombre && nitERP.primer_nombre != null ? "'"+nitERP.primer_nombre+"'" : "''"},${nitERP.otros_nombres && nitERP.otros_nombres != null ? "'"+nitERP.otros_nombres+"'" : "''"},${nitERP.primer_apellido && nitERP.primer_apellido != null ? "'"+nitERP.primer_apellido+"'" : "''"},${nitERP.segundo_apellido && nitERP.segundo_apellido != null ? "'"+nitERP.segundo_apellido+"'" : "''"},${nitERP.telefono_1 && nitERP.telefono_1 != null ? nitERP.telefono_1 : null},${nitERP.telefono_2 && nitERP.telefono_2 != null ? nitERP.telefono_2 : null},${nitERP.email && nitERP.email != null ? "'"+nitERP.email+"'" : null},${nitERP.direccion && nitERP.direccion != null ? "'"+nitERP.direccion+"'" : null},${null},${null},${null},${null})`);
                 }
             });
         }

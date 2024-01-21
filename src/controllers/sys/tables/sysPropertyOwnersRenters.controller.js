@@ -81,7 +81,8 @@ const getAllPropertiesByOwnerRenter = async (req, res) => {
   }
 };
 
-const createPropertyOwnerRenter = async (req, res) => {  
+const createPropertyOwnerRenter = async (req, res) => { 
+  
   try {
     const registerSchema = Joi.object({
         id_inmueble: Joi.number().required(), 
@@ -175,8 +176,11 @@ const createPropertyOwnerRenter = async (req, res) => {
   }
 };
 
-const putPropertyOwnerRenter = async (req, res) => {  
+const putPropertyOwnerRenter = async (req, res) => {
+
   try {
+    //BUSCAR FACTURAS CICLICAS SIN INMUEBLES RELACIONADOS
+
     const registerSchema = Joi.object({
         id_inmueble: Joi.number().required(), 
         id_persona: Joi.number().required(), 
@@ -238,6 +242,54 @@ const putPropertyOwnerRenter = async (req, res) => {
       [id_persona, porcentaje_administracion, paga_administracion, enviar_notificaciones, enviar_notificaciones_mail, enviar_notificaciones_fisica, tipo, req.user.id, id]
     );
 
+    //BUSCAR PERSONAS DESASOCIADAS DE INMUEBLES 
+    const [existInmueblesPerson] = await pool.query(
+      `SELECT
+        *
+      FROM inmueble_personas_admon
+        WHERE id_inmueble = ${id_inmueble}
+      GROUP BY id_persona`,
+    );
+    
+    var personasExistentes = []; 
+    await Promise.all(existInmueblesPerson.map(async existInmueble=>{
+      personasExistentes.push(existInmueble.id_persona);
+    }));
+
+    if (personasExistentes.length > 0) {//SI ENCUENTRA FACTURAS SIN % LAS ELIMINA
+
+      var facturasExistentes = [];
+
+      const [facturasCiclicas] = await pool.query(
+        `SELECT
+          *
+        FROM
+          facturas_ciclica
+          
+        WHERE id_persona NOT IN (${personasExistentes.toString()})
+          AND id_inmueble = ${id_inmueble}`,
+      );
+  
+      await Promise.all(facturasCiclicas.map(async facturaCiclica=>{
+        facturasExistentes.push(facturaCiclica.id);
+      }));
+
+      await pool.query(
+        `DELETE
+        FROM
+          facturas_ciclica
+        WHERE id IN (${facturasExistentes.toString()})`,
+      );
+  
+      await pool.query(
+        `DELETE
+        FROM
+          factura_ciclica_detalles
+        WHERE id_factura_ciclica IN (${facturasExistentes.toString()})`,
+      );    
+    }
+    //FINALIZAR DESASOCIAMIENTO DE INMUBLES
+
     let [tipoInmueble] = await pool.query("SELECT tipo FROM inmuebles WHERE id = ?",[id_inmueble]);
         tipoInmueble = tipoInmueble[0];
 
@@ -272,7 +324,7 @@ const putPropertyOwnerRenter = async (req, res) => {
 
     //CREATE OR UPDATE CYCLICAL BILL
     await createUpdatePropertyCyclicalBill({ idInmueble: id_inmueble, pool, adminConcept: conceptAdmonToUpdate, admonValidate: 0, percent: 0, req });
-    
+
     //GET EDITED PROPERTY OWNER RENTER
     const [rows] = await pool.query(`SELECT 
         t1.*, 
@@ -291,7 +343,8 @@ const putPropertyOwnerRenter = async (req, res) => {
   }
 };
 
-const deletePropertyOwnerRenter = async (req, res) => {       
+const deletePropertyOwnerRenter = async (req, res) => {
+        
   try {
     const registerSchema = Joi.object({
       id: Joi.number().required()
