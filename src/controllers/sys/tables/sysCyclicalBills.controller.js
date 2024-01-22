@@ -844,7 +844,7 @@ const processCyclicalBill = async (req, res) => {
     let billsHisDetailsToInsert = [];
     let valorTotal = 0;
 
-    // let [headCyclicalHis] = await pool.query(`INSERT INTO factura_ciclica_historial (valor_total, created_by, created_at) VALUES (?, ?, ?)`, [0, req.user.id, periodoFacturacion]);
+    let [headCyclicalHis] = await pool.query(`INSERT INTO factura_ciclica_historial (valor_total, created_by, created_at) VALUES (?, ?, ?)`, [0, req.user.id, periodoFacturacion]);
     let token = '';
     
     await Promise.all(preBills.map(async (preBill, index)=>{
