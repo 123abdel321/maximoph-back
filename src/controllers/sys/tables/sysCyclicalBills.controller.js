@@ -81,7 +81,6 @@ const getAllCyclicalBills = async (req, res) => {
         LEFT OUTER JOIN conceptos_facturacion t7 ON t7.id = t6.id_concepto_factura
       WHERE
         ${validateDate?`(DATE_FORMAT(NOW(),'%Y-%m-%d')>=t1.fecha_inicio OR DATE_FORMAT(NOW(),'%Y-%m-%d')<=t1.fecha_fin)`:'1=1'}
-        AND t5.porcentaje_administracion > 0
         ${validateDate?`GROUP BY id_persona, id_inmueble`:''}
       ORDER BY t1.id ASC
       `);
@@ -214,7 +213,6 @@ const getAllCyclicalBills = async (req, res) => {
 };
 
 const createCyclicalBill = async (req, res) => {
-
   try {
     const registerSchema = Joi.object({
         id_inmueble: Joi.number().required(), 
@@ -293,7 +291,6 @@ const createCyclicalBill = async (req, res) => {
 };
 
 const createCyclicalBillMassive = async (req, res) => {
-
   try {
     const registerSchema = Joi.object({
         tipo_concepto_masivo: Joi.number().required(), 
@@ -777,7 +774,7 @@ const processCyclicalBill = async (req, res) => {
       WHERE 
         t1.id = ${idConceptoIntereses}`);
         erpConceptIntereses = erpConceptIntereses[0];
-
+    
     //DELETE EXIST PERIOD - BULK ERP DOCUMENTS
     let [tokensToDelete] = await pool.query(`SELECT
         IFNULL(t3.token_erp,'') AS token_erp
@@ -847,9 +844,8 @@ const processCyclicalBill = async (req, res) => {
     let billsHisDetailsToInsert = [];
     let valorTotal = 0;
 
-    let [headCyclicalHis] = await pool.query(`INSERT INTO factura_ciclica_historial (valor_total, created_by, created_at) VALUES (?, ?, ?)`, [0, req.user.id, periodoFacturacion]);
+    // let [headCyclicalHis] = await pool.query(`INSERT INTO factura_ciclica_historial (valor_total, created_by, created_at) VALUES (?, ?, ?)`, [0, req.user.id, periodoFacturacion]);
     let token = '';
-    
     
     await Promise.all(preBills.map(async (preBill, index)=>{
 			
@@ -870,23 +866,23 @@ const processCyclicalBill = async (req, res) => {
           t1.id_persona = ? AND (DATE_FORMAT(NOW(),'%Y-%m-%d')>=t1.fecha_inicio OR DATE_FORMAT(NOW(),'%Y-%m-%d')<=t1.fecha_fin) AND t1.valor_total>0`,[preBill.id_persona]
 			);
     
-			var url = `extracto?id_nit=${preBill.id_tercero_erp}`;
+			var url = `extracto?id_nit=${preBill.id_tercero_erp}&id_tipo_cuenta=3`;
+      
 			let getExtractNitERP = await instance.get(url);
 				getExtractNitERP = getExtractNitERP.data;
 
       let totalPendiente = 0;
-      const billsA = Object.values(getExtractNitERP);
+      let totalPendienteSinIntereses = 0;
+      const billsA = getExtractNitERP.data;
+
       const totalPendienteXCuenta = [];
       
-
       billsA.forEach(bill=>{
+        
         if(Number(bill.saldo)>0&&(Number(bill.id_cuenta)==erpConceptAdmon.id_erp||Number(bill.id_cuenta)==erpConceptIntereses.id_erp)){
           totalPendiente += Number(bill.saldo);
         }
-      });
 
-      let totalPendienteSinIntereses = 0;
-      billsA.forEach(bill=>{
         if(Number(bill.saldo)>0&&Number(bill.id_cuenta)==erpConceptAdmon.id_erp){
           totalPendienteSinIntereses += Number(bill.saldo);
         }
