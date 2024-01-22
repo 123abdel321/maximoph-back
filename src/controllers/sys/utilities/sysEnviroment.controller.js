@@ -194,6 +194,7 @@ const getSyncAPIKEYERP = async (req, res) => {
             case "nits":
                 pathERP = 'nit';
                 typeERP = 3;
+            break;
             case "ciudades":
                 pathERP = 'ciudades?getall=1';
                 typeERP = 4;
@@ -209,10 +210,8 @@ const getSyncAPIKEYERP = async (req, res) => {
 		});
 
         let dataFromERP = await instance.get(pathERP);
-
             dataFromERP = dataFromERP.data.data;
 
-            
         if(typeERP !=3 &&  typeERP !=4) { //SINCRONIZAR CECOS, CUENTAS, COMRPOBANTES
             Object.keys(dataFromERP).forEach((id)=>{
                 var recordERP = dataFromERP[id];
@@ -228,6 +227,7 @@ const getSyncAPIKEYERP = async (req, res) => {
                     ON DUPLICATE KEY UPDATE id_erp = '${ciudadesERP.id}',  codigo = '${ciudadesERP.codigo}', nombre = '${ciudadesERP.nombre_completo}'`);
             });
         } else {// SINCRONIZAR NITS
+
             dataFromERP.forEach(async (nitERP) => {
                 var id_nit = await getPersona({//BUSCAR NIT
                     id_tercero_erp: nitERP.id,
@@ -235,12 +235,13 @@ const getSyncAPIKEYERP = async (req, res) => {
                 });
 
                 if (id_nit) { //ACTUALIZAR SI EXITE NIT 
-                    await updateInsertERP(`UPDATE personas SET id_tercero_erp='${nitERP.id}' WHERE numero_documento='${nitERP.numero_documento}'`);
+                    await pool.query(`UPDATE personas SET id_tercero_erp='${nitERP.id}' WHERE numero_documento='${nitERP.numero_documento}'`);
                 } else { //CREAR SI NO EXISTE NIT
-                    await updateInsertERP(`INSERT INTO personas (id_tercero_erp, tipo_documento, numero_documento, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, telefono, celular, email, direccion, fecha_nacimiento, sexo, avatar, importado) VALUES (${nitERP.id},${nitERP.id_tipo_documento && nitERP.id_tipo_documento != null ? nitERP.id_tipo_documento : "''"},${nitERP.numero_documento && nitERP.numero_documento != null ? nitERP.numero_documento : "''"},${nitERP.primer_nombre && nitERP.primer_nombre != null ? "'"+nitERP.primer_nombre+"'" : "''"},${nitERP.otros_nombres && nitERP.otros_nombres != null ? "'"+nitERP.otros_nombres+"'" : "''"},${nitERP.primer_apellido && nitERP.primer_apellido != null ? "'"+nitERP.primer_apellido+"'" : "''"},${nitERP.segundo_apellido && nitERP.segundo_apellido != null ? "'"+nitERP.segundo_apellido+"'" : "''"},${nitERP.telefono_1 && nitERP.telefono_1 != null ? nitERP.telefono_1 : null},${nitERP.telefono_2 && nitERP.telefono_2 != null ? nitERP.telefono_2 : null},${nitERP.email && nitERP.email != null ? "'"+nitERP.email+"'" : null},${nitERP.direccion && nitERP.direccion != null ? "'"+nitERP.direccion+"'" : null},${null},${null},${null},${null})`);
+                    await pool.query(`INSERT INTO personas (id_tercero_erp, tipo_documento, numero_documento, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, telefono, celular, email, direccion, fecha_nacimiento, sexo, avatar, importado) VALUES (${nitERP.id},${nitERP.id_tipo_documento && nitERP.id_tipo_documento != null ? nitERP.id_tipo_documento : "''"},${nitERP.numero_documento && nitERP.numero_documento != null ? nitERP.numero_documento : "''"},${nitERP.primer_nombre && nitERP.primer_nombre != null ? "'"+nitERP.primer_nombre+"'" : "''"},${nitERP.otros_nombres && nitERP.otros_nombres != null ? "'"+nitERP.otros_nombres+"'" : "''"},${nitERP.primer_apellido && nitERP.primer_apellido != null ? "'"+nitERP.primer_apellido+"'" : "''"},${nitERP.segundo_apellido && nitERP.segundo_apellido != null ? "'"+nitERP.segundo_apellido+"'" : "''"},${nitERP.telefono_1 && nitERP.telefono_1 != null ? nitERP.telefono_1 : null},${nitERP.telefono_2 && nitERP.telefono_2 != null ? nitERP.telefono_2 : null},${nitERP.email && nitERP.email != null ? "'"+nitERP.email+"'" : null},${nitERP.direccion && nitERP.direccion != null ? "'"+nitERP.direccion+"'" : null},${null},${null},${null},${null})`);
                 }
             });
         }
+
         if (updateInsertERP.length) {
             updateInsertERP = updateInsertERP.join(';');
             
@@ -257,7 +258,6 @@ const getSyncAPIKEYERP = async (req, res) => {
 
 const getPersona = async ({id_tercero_erp, pool})=>{
     let [persona] = await pool.query(`SELECT id_tercero_erp FROM personas WHERE id_tercero_erp = ?`, [id_tercero_erp] );
-    
     persona = persona.length ? persona[0].id_tercero_erp : "";
 
     return persona;
