@@ -89,10 +89,8 @@ const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
       getExtractNitERP = getExtractNitERP.data.data;
     }
     
+    const billsA = getExtractNitERP;
 
-
-    const billsA = Object.values(getExtractNitERP);
-    
     if(cuentaAnticipos){
       var urlAnticipos = `${process.env.URL_API_ERP}extracto?id_nit=${tercero}&id_tipo_cuenta=4`;
       let getExtractNitERPAnticipo = await instance.get(urlAnticipos);
@@ -110,7 +108,7 @@ const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
       });
     }
 
-    if(!personDateValidate){
+    if(personDateValidate){
       billsA.forEach(bill=>{
         if(Number(bill.saldo)>0&&cxcIdsErp.indexOf(bill.id_cuenta.toString())>=0){
           let fechaCausacion = new Date(bill.fecha_manual);
@@ -157,7 +155,7 @@ const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
           });
         }
       });
-
+      
       billsFiltered.sort((a, b) => {
         if (a.cuenta_numero !== b.cuenta_numero) {
           return a.cuenta_numero.toString().localeCompare(b.cuenta_numero.toString());
@@ -167,7 +165,7 @@ const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
       });
     }else if(billCashReceipt){
       totalPendiente = Number(billCashReceipt.valor_recibo);
-
+      
       if(descuentoProntoPago){
         totalDescuento = Number(billCashReceipt.valor_recibo);
         totalDescuento = totalDescuento*(porcentajeDescuentoProntoPago/100);
