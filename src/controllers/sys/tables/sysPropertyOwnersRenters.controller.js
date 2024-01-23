@@ -274,19 +274,21 @@ const putPropertyOwnerRenter = async (req, res) => {
         facturasExistentes.push(facturaCiclica.id);
       }));
 
-      await pool.query(
-        `DELETE
-        FROM
-          facturas_ciclica
-        WHERE id IN (${facturasExistentes.toString()})`,
-      );
-  
-      await pool.query(
-        `DELETE
-        FROM
-          factura_ciclica_detalles
-        WHERE id_factura_ciclica IN (${facturasExistentes.toString()})`,
-      );    
+      if (facturasExistentes.length) {
+        await pool.query(
+          `DELETE
+          FROM
+            facturas_ciclica
+          WHERE id IN (${facturasExistentes.toString()})`,
+        );
+    
+        await pool.query(
+          `DELETE
+          FROM
+            factura_ciclica_detalles
+          WHERE id_factura_ciclica IN (${facturasExistentes.toString()})`,
+        );
+      }
     }
     //FINALIZAR DESASOCIAMIENTO DE INMUBLES
 
@@ -363,11 +365,19 @@ const deletePropertyOwnerRenter = async (req, res) => {
     let [propertyOwnerToDelete] = await pool.query(`SELECT * FROM inmueble_personas_admon WHERE id = ? `, [ id ]);
     propertyOwnerToDelete = propertyOwnerToDelete[0];
 
-    //DELETE CYCLICAL BILL
-    await pool.query(`DELETE FROM facturas_ciclica WHERE id_persona = ? AND id_inmueble = ?`,
+    let [facturas_ciclica] = await pool.query(`SELECT * FROM facturas_ciclica WHERE id_persona = ? AND id_inmueble = ?`,
       [propertyOwnerToDelete.id_persona, propertyOwnerToDelete.id_inmueble]
     );
+    facturas_ciclica = facturas_ciclica[0];
 
+    //DELETE CYCLICAL BILL
+    await pool.query(`DELETE FROM facturas_ciclica WHERE id = ?`,
+      [facturas_ciclica.id]
+    );
+
+    await pool.query(`DELETE FROM factura_ciclica_detalles WHERE id_factura_ciclica = ?`,
+      [facturas_ciclica.id]
+    );
 
     //DELETE PROPERTY OWNER RENTER
     await pool.query(`DELETE FROM inmueble_personas_admon WHERE id = ?`,
