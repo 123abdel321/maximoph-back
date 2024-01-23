@@ -635,7 +635,7 @@ const genBulkMovAccountErp = async (pool, idHistory) => {
         t9.id_erp AS id_cuenta_por_cobrar,
         t10.id_erp AS id_cuenta_ingreso,
         t4.nombre AS nombre_concepto,
-        IFNULL(t3.descripcion,'') AS descripcion,
+        CONCAT(IFNULL(t3.descripcion,''), IF(IPA.porcentaje_administracion < 100,CONCAT(' ', IPA.porcentaje_administracion, '%'),'')) AS descripcion,
         t3.total,
         t2.token_erp AS token_factura,
         t2.consecutivo AS consecutivo_factura,
@@ -656,6 +656,7 @@ const genBulkMovAccountErp = async (pool, idHistory) => {
       INNER JOIN personas t5 ON t5.id = t2.id_persona
       INNER JOIN inmuebles t6 ON t6.id = t3.id_inmueble
       INNER JOIN zonas t7 ON t7.id = t6.id_inmueble_zona
+      INNER JOIN inmueble_personas_admon IPA ON t3.id_inmueble = IPA.id_inmueble AND t2.id_persona = IPA.id_persona
       LEFT OUTER JOIN erp_maestras t11 ON t11.id = t7.id_centro_costos_erp
     
     WHERE t1.id_factura_ciclica = ${idHistory}`);
@@ -865,14 +866,16 @@ const processCyclicalBill = async (req, res) => {
         WHERE 
           t1.id_persona = ? AND (DATE_FORMAT(NOW(),'%Y-%m-%d')>=t1.fecha_inicio OR DATE_FORMAT(NOW(),'%Y-%m-%d')<=t1.fecha_fin) AND t1.valor_total>0`,[preBill.id_persona]
 			);
-
-      let getExtractNitERP = await genExtractCustomerNit(preBill.id_tercero_erp, pool, preBill.id_persona);
-      getExtractNitERP = getExtractNitERP.data;
+      let getExtractNitERP = null;
+      if(apiKeyERP){
+        var url = `${process.env.URL_API_ERP}extracto?id_nit=${preBill.id_tercero_erp}&id_tipo_cuenta=3`;
+        getExtractNitERP = await instance.get(url);
+        getExtractNitERP = getExtractNitERP.data.data;
+      }
 
       let totalPendiente = 0;
       let totalPendienteSinIntereses = 0;
       const billsA = getExtractNitERP;
-      
       const totalPendienteXCuenta = [];
       billsA.forEach(bill=>{
         
