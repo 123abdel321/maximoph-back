@@ -719,7 +719,7 @@ const processCyclicalBill = async (req, res) => {
       WHERE 
         (DATE_FORMAT(NOW(),'%Y-%m-%d')>=t1.fecha_inicio OR DATE_FORMAT(NOW(),'%Y-%m-%d')<=t1.fecha_fin) AND t1.valor_total>0
       GROUP BY t1.id_persona;`);
-    
+ 
     let actualConsecutive = await getSysEnv({
       name: 'consecutivo_ventas',
       pool: pool
@@ -797,12 +797,12 @@ const processCyclicalBill = async (req, res) => {
       tokensToDelete.map(rec=>{
         tokensToSendDelete.push({"token" : rec.token_erp});
       });
-
+      
       await instance.post(`bulk-documentos-delete`, JSON.stringify({
         "documento": tokensToSendDelete
       }));
     }
-    
+
     //DELETE EXIST PERIOD - BILL DETAILS
     await pool.query(`DELETE 
       t4
@@ -865,18 +865,15 @@ const processCyclicalBill = async (req, res) => {
         WHERE 
           t1.id_persona = ? AND (DATE_FORMAT(NOW(),'%Y-%m-%d')>=t1.fecha_inicio OR DATE_FORMAT(NOW(),'%Y-%m-%d')<=t1.fecha_fin) AND t1.valor_total>0`,[preBill.id_persona]
 			);
-    
-			var url = `extracto?id_nit=${preBill.id_tercero_erp}&id_tipo_cuenta=3`;
-      
-			let getExtractNitERP = await instance.get(url);
-				getExtractNitERP = getExtractNitERP.data;
+
+      let getExtractNitERP = await genExtractCustomerNit(preBill.id_tercero_erp, pool, preBill.id_persona);
+      getExtractNitERP = getExtractNitERP.data;
 
       let totalPendiente = 0;
       let totalPendienteSinIntereses = 0;
-      const billsA = getExtractNitERP.data;
-
-      const totalPendienteXCuenta = [];
+      const billsA = getExtractNitERP;
       
+      const totalPendienteXCuenta = [];
       billsA.forEach(bill=>{
         
         if(Number(bill.saldo)>0&&(Number(bill.id_cuenta)==erpConceptAdmon.id_erp||Number(bill.id_cuenta)==erpConceptIntereses.id_erp)){
@@ -887,9 +884,9 @@ const processCyclicalBill = async (req, res) => {
           totalPendienteSinIntereses += Number(bill.saldo);
         }
       });
-
+      
       let extractCustomerNit = await genExtractCustomerNit(preBill.id_tercero_erp, pool, preBill.id_persona);
-
+      
       if(preBillDetails.length){
         let valorIntereses = 0;
   
@@ -938,10 +935,10 @@ const processCyclicalBill = async (req, res) => {
           totalAnticipos = (Number(preBill.valor_total)+valorIntereses);
         }
 
-        const [insertBill] = await pool.query(`INSERT INTO facturas (id_persona, consecutivo, saldo_anterior, total_anticipos, valor_total, token_erp, created_at)
+        const [insertBill] = await pool.query(`INSERT INTO facturas (id_persona, id_inmueble, consecutivo, saldo_anterior, total_anticipos, valor_total, token_erp, created_at)
         VALUES
-        (?, ?, ?, ?, ?, ?, ?)`,
-        [preBill.id_persona, (actualConsecutive+(index)), totalPendiente, totalAnticipos, (Number(preBill.valor_total)+valorIntereses), token, periodoFacturacion]);
+        (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [preBill.id_persona, preBill.id_inmueble, (actualConsecutive+(index)), totalPendiente, totalAnticipos, (Number(preBill.valor_total)+valorIntereses), token, periodoFacturacion]);
         
         valorTotal += (Number(preBill.valor_total)+valorIntereses);
 
@@ -984,8 +981,8 @@ const processCyclicalBill = async (req, res) => {
     await pool.query(`UPDATE facturas t1 SET t1.valor_total = (SELECT SUM(t2.total) FROM factura_detalles t2 WHERE t2.id_factura = t1.id) WHERE 1=1`);
     
     let bulkMovAccountErp = await genBulkMovAccountErp(pool, headCyclicalHis.insertId);
-
-		await instance.post(`bulk-documentos`,JSON.stringify({
+    
+    await instance.post(`bulk-documentos`,JSON.stringify({
       "documento": bulkMovAccountErp
 		}));
 
