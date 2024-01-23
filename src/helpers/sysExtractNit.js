@@ -2,7 +2,7 @@ import axios from "axios";
 import { getSysEnv } from "./sysEnviroment.js";
 
 const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
-  console.log('genExtractCustomerNit');
+  
   try {
     let apiKeyERP = await getSysEnv({
       name: 'api_key_erp',
@@ -88,26 +88,27 @@ const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
       getExtractNitERP = await instance.get(url);
       getExtractNitERP = getExtractNitERP.data.data;
     }
+    
+
 
     const billsA = Object.values(getExtractNitERP);
     
-    // if(cuentaAnticipos){
-    //   let getExtractNitERPAnticipo = await axios.get(`${process.env.URL_API_ERP}document?id_nit=${tercero}&id_cuenta=${cuentaAnticipos}&key=${apiKeyERP}`);
-
-    //   getExtractNitERPAnticipo = getExtractNitERPAnticipo.data.data;
+    if(cuentaAnticipos){
+      var urlAnticipos = `${process.env.URL_API_ERP}extracto?id_nit=${tercero}&id_tipo_cuenta=4`;
+      let getExtractNitERPAnticipo = await instance.get(urlAnticipos);
+      getExtractNitERPAnticipo = getExtractNitERPAnticipo.data.data;
   
-    //   const anticiposTercero = Object.values(getExtractNitERPAnticipo);
-
-    //   anticiposTercero.forEach(bill=>{
-    //     if(bill.id_cuenta==cuentaAnticipos){
-    //       if(Number(bill.tipo)==1){
-    //         anticiposCredito += Number(bill.valor);
-    //       }else{
-    //         anticiposDebito += Number(bill.valor);
-    //       }
-    //     }
-    //   });
-    // }
+      const anticiposTercero = Object.values(getExtractNitERPAnticipo);
+      anticiposTercero.forEach(bill=>{
+        if(bill.id_cuenta==cuentaAnticipos){
+          if(Number(bill.tipo)==1){
+            anticiposCredito += Number(bill.valor);
+          }else{
+            anticiposDebito += Number(bill.valor);
+          }
+        }
+      });
+    }
 
     if(!personDateValidate){
       billsA.forEach(bill=>{
