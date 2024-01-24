@@ -642,7 +642,7 @@ const genBulkMovAccountErp = async (pool, idHistory) => {
         IFNULL(t2.total_anticipos,0) AS total_anticipos,
         DATE_FORMAT(t2.created_at,"%Y-%m-%d") AS fecha_factura,
         t5.id_tercero_erp,
-        CONCAT(DATE_FORMAT(t2.created_at, "%m%y")) AS documento_referencia,
+        CONCAT(DATE_FORMAT(t2.created_at, "%m"), '-', DATE_FORMAT(t2.created_at,"%Y")) AS documento_referencia,
         IFNULL((SELECT t12.id_erp FROM entorno t8 INNER JOIN erp_maestras t12 ON t12.id = t8.valor WHERE t8.campo='id_comprobante_ventas_erp' LIMIT 1),0) AS id_comprobante,
         IFNULL(t11.id_erp,'') AS id_centro_costos
           

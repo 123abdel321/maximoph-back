@@ -878,10 +878,20 @@ const genBillPDF = async (id, pool, req) => {
 
   if(logoCompany){
     logoCompany = (process.env.REACT_API_URL||'https://api.maximoph.com')+"/uploads/company-logo/"+logoCompany;
-  }
+  }  
 
   let [headBill] = await pool.query(`SELECT 
-      DATE_FORMAT(t1.created_at, '%m %Y') AS periodo, t1.estado, DATE_FORMAT(t1.created_at, '%Y-%m-%d') AS fecha, t1.id_inmueble AS codigo_inmueble, t1.consecutivo As cuenta_cobro_num, CONCAT(FORMAT(t3.numero_documento,0),' ',t3.primer_nombre,' ',t3.segundo_nombre,' ',t3.primer_apellido,' ',t3.segundo_apellido) AS persona_nombre, t3.email As persona_email, FORMAT(IFNULL(t1.saldo_anterior,0),0) AS saldo_anterior_factura, FORMAT(((IFNULL(t1.saldo_anterior,0)+t1.valor_total)-IFNULL(t1.total_anticipos,0)),0) AS total_factura,  FORMAT(IFNULL(t1.total_anticipos,0),0) AS total_anticipos, DATE_FORMAT(NOW(),"%Y-%m-%d %H:%i:%s") AS fecha_impresion
+      DATE_FORMAT(t1.created_at, '%m %Y') AS periodo,
+      t1.estado,
+      DATE_FORMAT(t1.created_at, '%Y-%m-%d') AS fecha,
+      t1.id_inmueble AS codigo_inmueble,
+      t1.consecutivo As cuenta_cobro_num,
+      CONCAT(t3.numero_documento,' ',t3.primer_nombre,' ',t3.segundo_nombre,' ',t3.primer_apellido,' ',t3.segundo_apellido) AS persona_nombre,
+      t3.email As persona_email,
+      FORMAT(IFNULL(t1.saldo_anterior,0),0) AS saldo_anterior_factura,
+      FORMAT(((IFNULL(t1.saldo_anterior,0)+t1.valor_total)-IFNULL(t1.total_anticipos,0)),0) AS total_factura,
+      FORMAT(IFNULL(t1.total_anticipos,0),0) AS total_anticipos,
+      DATE_FORMAT(NOW(),"%Y-%m-%d %H:%i:%s") AS fecha_impresion
   FROM facturas t1 
       INNER JOIN personas t3 ON t3.id = t1.id_persona 
   WHERE t1.id = ?`,[id]);

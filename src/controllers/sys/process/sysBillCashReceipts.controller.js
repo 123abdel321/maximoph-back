@@ -108,22 +108,22 @@ const createBillCashReceiptProcess = async (data, pool, req) => {
     
     let tokenErp = await genRandomToken();
 
-    let responseExtract = await genExtractCustomerNit(id_tercero_erp, pool, false);
-
+    let responseExtract = await genExtractCustomerNit(id_tercero_erp, pool, true);
+    
     if(Number(valor_recibo)>Number(responseExtract.totalPendiente)&&!cuentaAnticipos){
       return res.status(201).json({ success: false, error: 'El valor del abono es superior al saldo pendiente.' });
     }
-
+    
     fecha_recibo = fecha_recibo.indexOf("T")>=0 ? fecha_recibo.split("T")[0] : fecha_recibo;
 
     let [cxcIdErpIntereses] = await pool.query(`SELECT GROUP_CONCAT(t2.id_erp) AS id_cxc_intereses FROM conceptos_facturacion t1 INNER JOIN erp_maestras t2 ON t2.id = t1.id_cuenta_por_cobrar INNER JOIN entorno t3 ON t3.valor = t1.id AND t3.campo='id_concepto_intereses' WHERE t1.eliminado=0`);
-         cxcIdErpIntereses = cxcIdErpIntereses[0].id_cxc_intereses;
+      cxcIdErpIntereses = cxcIdErpIntereses[0].id_cxc_intereses;
     
     let [cxcIdErpDescuento] = await pool.query(`SELECT t2.id_erp AS id_cuenta_descuento_erp FROM entorno t1 INNER JOIN erp_maestras t2 ON t2.id = t1.valor WHERE t1.campo='id_cuenta_descuento_erp'`);
-         cxcIdErpDescuento = cxcIdErpDescuento[0].id_cuenta_descuento_erp;
+      cxcIdErpDescuento = cxcIdErpDescuento[0].id_cuenta_descuento_erp;
 
     let [reciboComprobanteErp] = await pool.query(`SELECT t2.id_erp FROM entorno t1 INNER JOIN erp_maestras t2 ON t2.id = t1.valor WHERE t1.campo='id_comprobante_recibos_caja_erp'`);
-    reciboComprobanteErp = reciboComprobanteErp[0].id_erp;
+      reciboComprobanteErp = reciboComprobanteErp[0].id_erp;
 
     if(cuentaAnticipos){
       [cuentaAnticipos] = await pool.query(`SELECT t2.id_erp FROM entorno t1 INNER JOIN erp_maestras t2 ON t2.id = t1.valor WHERE t1.campo='id_cuenta_anticipos_erp'`);

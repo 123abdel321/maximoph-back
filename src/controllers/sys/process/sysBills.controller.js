@@ -4,6 +4,7 @@ import { genBillPDF, genBillsPDF } from "../../../helpers/sysGenSystemPDF.js";
 import { sendEmailBillPDF } from "../../../helpers/sysEmailBillPDF.js";
 
 const getAllBills = async (req, res) => {
+  
   try {
     let pool = poolSys.getPool(req.user.token_db);
 
@@ -36,6 +37,7 @@ const getAllBills = async (req, res) => {
 };
 
 const getBillPDF = async (req, res) => {
+  
   try {
     const registerSchema = Joi.object({
       id: Joi.string().required()
@@ -46,7 +48,7 @@ const getBillPDF = async (req, res) => {
     if (error) {
       return res.status(201).json({ success: false, error: error.message });
     }
-    
+
     const { id } = req.params;
     
     let pool = poolSys.getPool(req.user.token_db);
@@ -63,6 +65,7 @@ const getBillPDF = async (req, res) => {
 };
 
 const getBillsPDF = async (req, res) => {
+
   try {
     const registerSchema = Joi.object({
       id: Joi.string().required(),
@@ -91,6 +94,7 @@ const getBillsPDF = async (req, res) => {
 };
 
 const getSendEmailBillPDF = async (req, res) => {
+
   try {
     const registerSchema = Joi.object({
       id: Joi.string().required()
@@ -106,7 +110,7 @@ const getSendEmailBillPDF = async (req, res) => {
     
     let pool = poolSys.getPool(req.user.token_db);
 
-    await sendEmailBillPDF(id, pool);
+    await sendEmailBillPDF(id, pool, req);
     
     //pool.end();
 
