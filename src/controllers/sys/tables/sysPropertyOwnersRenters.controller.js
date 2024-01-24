@@ -115,14 +115,6 @@ const createPropertyOwnerRenter = async (req, res) => {
       return res.status(201).json({ success: false, error: `El propietario/inquilinos ya se encuentra asociado al inmueble.` });
     }
 
-    //CREATE PROPERTY OWNER RENTER
-    const [insertedNewPropertyOwnerRenter] = await pool.query(`INSERT INTO inmueble_personas_admon 
-            (id_inmueble, id_persona, porcentaje_administracion, paga_administracion, enviar_notificaciones, enviar_notificaciones_mail, enviar_notificaciones_fisica, tipo, created_by) 
-                VALUES 
-            (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id_inmueble, id_persona, porcentaje_administracion, paga_administracion, enviar_notificaciones, enviar_notificaciones_mail, enviar_notificaciones_fisica, tipo, req.user.id]
-    );
-
     let [tipoInmueble] = await pool.query("SELECT tipo FROM inmuebles WHERE id = ?",[id_inmueble]);
         tipoInmueble = tipoInmueble[0];
 
@@ -155,8 +147,20 @@ const createPropertyOwnerRenter = async (req, res) => {
         break;
     }
 
+    if (!conceptAdmonToUpdate) {
+      return res.status(201).json({ success: false, error: `El sistema no tiene los conceptos configurados;<br/> Entorno > Configuración General Máximo PH` });
+    }
+
+    //CREATE PROPERTY OWNER RENTER
+    const [insertedNewPropertyOwnerRenter] = await pool.query(`INSERT INTO inmueble_personas_admon 
+            (id_inmueble, id_persona, porcentaje_administracion, paga_administracion, enviar_notificaciones, enviar_notificaciones_mail, enviar_notificaciones_fisica, tipo, created_by) 
+                VALUES 
+            (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id_inmueble, id_persona, porcentaje_administracion, paga_administracion, enviar_notificaciones, enviar_notificaciones_mail, enviar_notificaciones_fisica, tipo, req.user.id]
+    );
+    
     //CREATE OR UPDATE CYCLICAL BILL
-    await createUpdatePropertyCyclicalBill({ idInmueble: id_inmueble, pool, adminConcept: conceptAdmonToUpdate, admonValidate: 0, percent: 0, req });
+    await createUpdatePropertyCyclicalBill({ id_inmueble, pool, adminConcept: conceptAdmonToUpdate, admonValidate: 0, percent: 0, req });
     
     //GET NEW PROPERTY OWNER RENTER
     const [rows] = await pool.query(`SELECT 
@@ -177,7 +181,7 @@ const createPropertyOwnerRenter = async (req, res) => {
 };
 
 const putPropertyOwnerRenter = async (req, res) => {
-
+  
   try {
     //BUSCAR FACTURAS CICLICAS SIN INMUEBLES RELACIONADOS
 
