@@ -29,7 +29,6 @@ const storage = multer.diskStorage({
 });
 
 //BILL CASH RECEIPTS
-
 const getAllBillCashReceipts = async (req, res) => {
   try {
     let pool = poolSys.getPool(req.user.token_db);
@@ -93,7 +92,7 @@ const getCurrentDateTime = ()=>{
 };
 
 const createBillCashReceiptProcess = async (data, pool, req) => {
-  console.log('createBillCashReceiptProcess');
+  
   try {
     let { id_persona, id_tercero_erp, fecha_recibo, valor_recibo, id_cuenta_ingreso_recibos_caja_erp, intereses, descuento_pronto_pago, observacion } = data;
     
@@ -344,7 +343,6 @@ const createBillCashReceiptProcess = async (data, pool, req) => {
 };
 
 const createBillCashReceipt = async (req, res) => { 
-  console.log('createBillCashReceipt');
 
   try {  
     const registerSchema = Joi.object({
@@ -382,7 +380,6 @@ const createBillCashReceipt = async (req, res) => {
 };
 
 const createBillCashReceiptAnticipos = async (req, res) => {
-  console.log('createBillCashReceiptAnticipos');
 
   try {  
     const registerSchema = Joi.object({
@@ -434,7 +431,6 @@ const createBillCashReceiptAnticipos = async (req, res) => {
 };
 
 const deleteBillCashReceipt = async (req, res) => {
-  console.log('deleteBillCashReceipt: ',deleteBillCashReceipt);
   try {
     const registerSchema = Joi.object({
       id: Joi.number().required()
@@ -524,7 +520,7 @@ const deleteBillCashReceipt = async (req, res) => {
 };
 
 const getExtractNit = async (req, res) => {
-  console.log('getExtractNit');
+  
   try {
     const registerSchema = Joi.object({
         tercero: Joi.number().required()
@@ -540,7 +536,7 @@ const getExtractNit = async (req, res) => {
     
     let pool = poolSys.getPool(req.user.token_db);
 
-    let response = await genExtractCustomerNit(tercero, pool, false);
+    let response = await genExtractCustomerNit(tercero, pool, true);
         response.success = true;
 
     //pool.end();
@@ -608,7 +604,6 @@ const getPeaceAndSafetyPDF = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Internal Server Error', error: error.message });
   }
 };
-
 
 //VOUCHERS
 const getOwnVouchers = async (req, res) => {
