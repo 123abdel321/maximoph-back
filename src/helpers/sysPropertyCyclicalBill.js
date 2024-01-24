@@ -5,27 +5,31 @@ const createUpdatePropertyCyclicalBill = async ({idInmueble, pool, adminConcept,
   if(adminConcept||customConcept){//CREATE OR UPDATE CYCLICAL BILL
 
       //GET ACTUAL OWNERS AND RENTERS
-      const [ownersRenters] = await pool.query(`SELECT 
-          IFNULL(t2.id,'') AS id_factura_ciclica,
-          IFNULL(t3.id,'') AS id_detalle_ciclica, t1.porcentaje_administracion, t1.id_persona,
-          IFNULL(t4.valor_total_administracion,0) AS valor_total_administracion, t4.tipo
-      FROM inmueble_personas_admon t1 
-        LEFT OUTER JOIN facturas_ciclica t2 ON t2.id_persona = t1.id_persona AND t2.id_inmueble = t1.id_inmueble
-        LEFT OUTER JOIN factura_ciclica_detalles t3 ON t3.id_factura_ciclica = t2.id AND t3.id_concepto_factura = ?
-        INNER JOIN inmuebles t4 ON t4.id = t1.id_inmueble
-      WHERE
-          t1.id_inmueble = ? AND
-          t1.porcentaje_administracion > 0
-        
-      GROUP BY t1.id`, [adminConcept, idInmueble]);
+      const [ownersRenters] = await pool.query(`SELECT
+            t1.id,
+            t1.id_inmueble,
+            IFNULL(t2.id,'') AS id_factura_ciclica,
+            IFNULL(t3.id,'') AS id_detalle_ciclica,
+            t1.porcentaje_administracion,
+            t1.id_persona,
+            IFNULL(t4.valor_total_administracion,0) AS valor_total_administracion,
+            t4.tipo
+        FROM inmueble_personas_admon t1 
+          LEFT OUTER JOIN facturas_ciclica t2 ON t2.id_persona = t1.id_persona AND t2.id_inmueble = t1.id_inmueble
+          LEFT OUTER JOIN factura_ciclica_detalles t3 ON t3.id_factura_ciclica = t2.id AND t3.id_concepto_factura = ${adminConcept}
+          INNER JOIN inmuebles t4 ON t4.id = t1.id_inmueble
+        WHERE
+            t1.id_inmueble = ${idInmueble}
+        `);
 
       let porcentajeAdmin = 0;
       await Promise.all(ownersRenters.map(async ownerRenter=>{
-          admonValidate = admonValidate ? admonValidate : Number(ownerRenter.valor_total_administracion);
+        
+        admonValidate = admonValidate ? admonValidate : Number(ownerRenter.valor_total_administracion);
           porcentajeAdmin = Number((ownerRenter.porcentaje_administracion/100).toFixed(2));
           porcentajeAdmin = Math.round(admonValidate*porcentajeAdmin);
           porcentajeAdmin = (porcentajeAdmin!=null && porcentajeAdmin!='' ? porcentajeAdmin : 0);
-
+  
           porcentajeAdmin = await roundValues({
             val: porcentajeAdmin,
             pool
@@ -37,9 +41,9 @@ const createUpdatePropertyCyclicalBill = async ({idInmueble, pool, adminConcept,
             VALUES
             (?, ?, ?, ?, ?, ?, NOW())`,
             [idInmueble, ownerRenter.id_persona, customConcept.ini, customConcept.end, porcentajeAdmin, req.user.id]);
-
+  
             customConcept.descripcion = `${customConcept.descripcion} ${percent!=0?`- COEFICIENTE: ${percent}`:''}`;
-
+  
             await pool.query(`INSERT INTO factura_ciclica_detalles 
             (id_factura_ciclica, id_concepto_factura, cantidad, valor_unitario, total, descripcion, created_by, created_at)
             VALUES
@@ -63,17 +67,22 @@ const createUpdatePropertyCyclicalBill = async ({idInmueble, pool, adminConcept,
               WHERE t1.id = ?
               `,[ownerRenter.id_factura_ciclica]);
           }else if(porcentajeAdmin>0){ //IF NOT EXIST HEAD: INSERT NEW CYCLICAL BILL
-              const [insertedBillHead] = await pool.query(`INSERT INTO facturas_ciclica 
-              (id_inmueble, id_persona, fecha_inicio, valor_total, created_by, created_at)
-              VALUES
-              (?, ?, NOW(), ?, ?, NOW())`,
-              [idInmueble, ownerRenter.id_persona, porcentajeAdmin, req.user.id]);
 
-              await pool.query(`INSERT INTO factura_ciclica_detalles 
-              (id_factura_ciclica, id_concepto_factura, cantidad, valor_unitario, total, created_by, created_at)
-              VALUES
-              (?, ?, ?, ?, ?, ?, NOW())`,
-              [insertedBillHead.insertId, adminConcept, 1, porcentajeAdmin, porcentajeAdmin, req.user.id]);
+              const [existeFactura] = await pool.query(`SELECT * FROM facturas_ciclica WHERE id_inmueble = ${idInmueble} AND id_persona = ${ownerRenter.id_persona}`);
+              
+              if (!existeFactura.length) {
+                const [insertedBillHead] = await pool.query(`INSERT INTO facturas_ciclica 
+                (id_inmueble, id_persona, fecha_inicio, valor_total, created_by, created_at)
+                VALUES
+                (?, ?, NOW(), ?, ?, NOW())`,
+                [idInmueble, ownerRenter.id_persona, porcentajeAdmin, req.user.id]);
+    
+                await pool.query(`INSERT INTO factura_ciclica_detalles 
+                (id_factura_ciclica, id_concepto_factura, cantidad, valor_unitario, total, created_by, created_at)
+                VALUES
+                (?, ?, ?, ?, ?, ?, NOW())`,
+                [insertedBillHead.insertId, adminConcept, 1, porcentajeAdmin, porcentajeAdmin, req.user.id]);
+              }
           }
       }));
 
