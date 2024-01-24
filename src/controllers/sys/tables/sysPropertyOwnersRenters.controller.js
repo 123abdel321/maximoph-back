@@ -160,7 +160,7 @@ const createPropertyOwnerRenter = async (req, res) => {
     );
     
     //CREATE OR UPDATE CYCLICAL BILL
-    await createUpdatePropertyCyclicalBill({ id_inmueble, pool, adminConcept: conceptAdmonToUpdate, admonValidate: 0, percent: 0, req });
+    await createUpdatePropertyCyclicalBill({ idInmueble: id_inmueble, pool, adminConcept: conceptAdmonToUpdate, admonValidate: 0, percent: 0, req });
     
     //GET NEW PROPERTY OWNER RENTER
     const [rows] = await pool.query(`SELECT 
