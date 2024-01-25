@@ -213,6 +213,7 @@ const getAllCyclicalBills = async (req, res) => {
 };
 
 const createCyclicalBill = async (req, res) => {
+  
   try {
     const registerSchema = Joi.object({
         id_inmueble: Joi.number().required(), 
@@ -236,7 +237,7 @@ const createCyclicalBill = async (req, res) => {
     fecha_fin = fecha_fin ? fecha_fin.split("T")[0] : fecha_fin;
 
     let pool = poolSys.getPool(req.user.token_db);
-
+    valor_total = valor_total.replace('.','');
     valor_total = await roundValues({
       val: valor_total,
       pool

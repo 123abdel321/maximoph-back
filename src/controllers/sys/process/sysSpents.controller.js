@@ -126,6 +126,7 @@ const getCurrentDateTime = ()=>{
 
 //GEN ACCOUNT BULK DOCUMENTS TO ERP
 const genBulkMovAccountErp = async (pool, idSpent, gastoXPagarCuentaEgresoErp) => {
+
   try {
     let [spents] = await pool.query(`SELECT 
         t9.id_erp AS id_cuenta_gasto,
@@ -142,7 +143,7 @@ const genBulkMovAccountErp = async (pool, idSpent, gastoXPagarCuentaEgresoErp) =
         DATE_FORMAT(t1.created_at,"%Y-%m-%d") AS fecha_factura,
         t5.id_tercero_erp,
         IFNULL(t13.id_erp,'') AS id_centro_costos,
-        IFNULL(t1.token_erp,0) AS token_erp,
+        IFNULL(t1.token_erp,0) AS token_factura,
         IFNULL((SELECT t12.id_erp FROM entorno t8 INNER JOIN erp_maestras t12 ON t12.id = t8.valor WHERE t8.campo='id_comprobante_gastos_erp' LIMIT 1),0) AS id_comprobante
       FROM gastos t1 
         INNER JOIN gasto_detalle t2 ON t2.id_gasto = t1.id
