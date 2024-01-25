@@ -24,7 +24,7 @@ const genSpentPDF = async (id, pool, req) => {
     t1.id_persona_proveedor,
 
     CONCAT(
-      FORMAT(t2.numero_documento,0),' ',
+      t2.numero_documento,' ',
       IFNULL(t2.primer_nombre,''),' ',
       IFNULL(t2.segundo_nombre,''),' ',
       IFNULL(t2.primer_apellido,''),' ',
@@ -35,7 +35,7 @@ const genSpentPDF = async (id, pool, req) => {
 
     DATE_FORMAT(t1.fecha_documento,"%Y-%m-%d") AS fecha_documento,
     
-    FORMAT(IFNULL(t1.valor_total_iva,0),0) AS valor_total_iva,
+    IFNULL(t1.valor_total_iva,0) AS valor_total_iva,
     
     FORMAT(t1.valor_total,0) AS valor_total,
     
@@ -268,7 +268,7 @@ const genBillCashReceiptPDF = async (id, pool, req) => {
     IFNULL(t1.estado,1) AS estado,
 
     CONCAT(
-      FORMAT(t2.numero_documento,0),' ',
+      t2.numero_documento,' ',
       IFNULL(t2.primer_nombre,''),' ',
       IFNULL(t2.segundo_nombre,''),' ',
       IFNULL(t2.primer_apellido,''),' ',
@@ -477,7 +477,7 @@ const genPeaceAndSafetyPDF = async (persona, pool, req) => {
     t1.id,
 
     CONCAT(
-      FORMAT(t1.numero_documento,0),' ',
+      t1.numero_documento,' ',
       IFNULL(t1.primer_nombre,''),' ',
       IFNULL(t1.segundo_nombre,''),' ',
       IFNULL(t1.primer_apellido,''),' ',
@@ -675,7 +675,7 @@ const genPaymentPDF = async (id, pool, req) => {
     IFNULL(t1.estado,1) AS estado,
 
     CONCAT(
-      FORMAT(t2.numero_documento,0),' ',
+      t2.numero_documento,' ',
       IFNULL(t2.primer_nombre,''),' ',
       IFNULL(t2.segundo_nombre,''),' ',
       IFNULL(t2.primer_apellido,''),' ',
@@ -1152,7 +1152,7 @@ const genBillsPDF = async (id, fisico, pool, req) => {
 
   await Promise.all(historyBills.map(async bill=>{
     let [headBill] = await pool.query(`SELECT 
-      DATE_FORMAT(t1.created_at, '%m %Y') AS periodo, t1.estado, DATE_FORMAT(t1.created_at, '%Y-%m-%d') AS fecha, t1.id_inmueble AS codigo_inmueble, t1.consecutivo As cuenta_cobro_num, CONCAT(FORMAT(t3.numero_documento,0),' ',t3.primer_nombre,' ',t3.segundo_nombre,' ',t3.primer_apellido,' ',t3.segundo_apellido) AS persona_nombre, t3.email As persona_email, FORMAT(IFNULL(t1.saldo_anterior,0),0) AS saldo_anterior_factura, FORMAT(((IFNULL(t1.saldo_anterior,0)+t1.valor_total)-IFNULL(t1.total_anticipos,0)),0) AS total_factura,  FORMAT(IFNULL(t1.total_anticipos,0),0) AS total_anticipos, DATE_FORMAT(NOW(),"%Y-%m-%d %H:%i:%s") AS fecha_impresion
+      DATE_FORMAT(t1.created_at, '%m %Y') AS periodo, t1.estado, DATE_FORMAT(t1.created_at, '%Y-%m-%d') AS fecha, t1.id_inmueble AS codigo_inmueble, t1.consecutivo As cuenta_cobro_num, CONCAT(t3.numero_documento,' ',t3.primer_nombre,' ',t3.segundo_nombre,' ',t3.primer_apellido,' ',t3.segundo_apellido) AS persona_nombre, t3.email As persona_email, FORMAT(IFNULL(t1.saldo_anterior,0),0) AS saldo_anterior_factura, FORMAT(((IFNULL(t1.saldo_anterior,0)+t1.valor_total)-IFNULL(t1.total_anticipos,0)),0) AS total_factura,  FORMAT(IFNULL(t1.total_anticipos,0),0) AS total_anticipos, DATE_FORMAT(NOW(),"%Y-%m-%d %H:%i:%s") AS fecha_impresion
     FROM facturas t1 
         INNER JOIN personas t3 ON t3.id = t1.id_persona 
     WHERE t1.id = ? ${fisico==1 ? 'AND 1 = 1' : ''}`,[bill.id_factura]);

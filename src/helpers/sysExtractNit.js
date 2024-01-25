@@ -13,8 +13,7 @@ const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
     let totalGlobalDescuento = 0;
     let totalGlobalIntereses = 0;
 
-    let anticiposCredito = 0;//credito-1
-    let anticiposDebito = 0;//debito-0
+    let totalAnticipos = 0;
 
     let billsFiltered = [];
 
@@ -92,18 +91,13 @@ const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
     const billsA = getExtractNitERP;
 
     if(cuentaAnticipos){
-      var urlAnticipos = `${process.env.URL_API_ERP}extracto?id_nit=${tercero}&id_tipo_cuenta=4`;
+      var urlAnticipos = `${process.env.URL_API_ERP}extracto?id_nit=${tercero}&id_cuenta=${cuentaAnticipos}`;
       let getExtractNitERPAnticipo = await instance.get(urlAnticipos);
       getExtractNitERPAnticipo = getExtractNitERPAnticipo.data.data;
-  
       const anticiposTercero = Object.values(getExtractNitERPAnticipo);
       anticiposTercero.forEach(bill=>{
         if(bill.id_cuenta==cuentaAnticipos){
-          if(Number(bill.tipo)==1){
-            anticiposCredito += Number(bill.valor);
-          }else{
-            anticiposDebito += Number(bill.valor);
-          }
+          totalAnticipos+= Number(bill.saldo);
         }
       });
     }
@@ -183,7 +177,7 @@ const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
 
     return {
       data: billsFiltered, 
-      anticipos: Math.abs(anticiposCredito-anticiposDebito),
+      anticipos: totalAnticipos,
       porcentajeDescuentoProntoPago,
       descuentoProntoPago,
       porcentajeInteresesMora,
@@ -231,7 +225,7 @@ const genExtractProvaiderNit = async (tercero, pool) => {
     });
 
     if(apiKeyERP){
-      var url = `${process.env.URL_API_ERP}extracto?id_nit=${tercero}&id_tipo_cuenta=3`;
+      var url = `${process.env.URL_API_ERP}extracto?id_nit=${tercero}&id_tipo_cuenta=4`;
       getExtractNitERP = await instance.get(url);
       getExtractNitERP = getExtractNitERP.data.data;
     }
