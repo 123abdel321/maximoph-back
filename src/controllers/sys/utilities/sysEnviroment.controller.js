@@ -120,7 +120,7 @@ const getSummaryErp = async (req, res) => {
 };
 
 const getValidateAPIKEYERP = async (req, res) => {
-
+    console.log('getValidateAPIKEYERP');
     try {    
         const pool = poolSys.getPool(req.user.token_db);
 
@@ -135,9 +135,10 @@ const getValidateAPIKEYERP = async (req, res) => {
         });
 
         var url = `${process.env.URL_API_ERP}nit`;
+        console.log('url: ',url);
         let validateAPIKEYERP = await instance.get(url);
+        console.log('validateAPIKEYERP: ',validateAPIKEYERP);
             validateAPIKEYERP = validateAPIKEYERP.data;
-        
         await updateSysEnv({
             name: 'api_key_erp',
             val: key,
