@@ -116,7 +116,7 @@ const createPropertyOwnerRenter = async (req, res) => {
     }
 
     let [tipoInmueble] = await pool.query("SELECT tipo FROM inmuebles WHERE id = ?",[id_inmueble]);
-        tipoInmueble = tipoInmueble[0];
+        tipoInmueble = tipoInmueble[0].tipo;
 
     let adminConcept = await getSysEnv({
         name: 'id_concepto_administracion',
@@ -297,7 +297,7 @@ const putPropertyOwnerRenter = async (req, res) => {
     //FINALIZAR DESASOCIAMIENTO DE INMUBLES
 
     let [tipoInmueble] = await pool.query("SELECT tipo FROM inmuebles WHERE id = ?",[id_inmueble]);
-        tipoInmueble = tipoInmueble[0];
+    tipoInmueble = tipoInmueble[0].tipo;
 
     let adminConcept = await getSysEnv({
         name: 'id_concepto_administracion',

@@ -20,8 +20,17 @@ const getAllBillingConcepts = async (req, res) => {
 
     let pool = poolSys.getPool(req.user.token_db);
 
-    const [listBillingConcepts] = await pool.query(`SELECT 
-        t1.*, 
+    const [listBillingConcepts] = await pool.query(`SELECT
+        t1.id,
+        t1.id_cuenta_ingreso_erp,
+        t1.id_cuenta_interes_erp,
+        t1.id_cuenta_por_cobrar,
+        t1.id_cuenta_iva_erp,
+        t1.nombre,
+        IF(t1.intereses = 1,'SI','NO') AS intereses,
+        t1.valor,
+        t1.eliminado,
+        t1.updated_at,
         t1.id AS value,
         CONCAT(t1.id,' - ',t1.nombre) AS label,
         CONCAT(t2.codigo,' - ',t2.nombre)  AS cuentaIngresoLabel,
@@ -124,7 +133,8 @@ const createBillingConcept = async (req, res) => {
   }
 };
 
-const putBillingConcept = async (req, res) => {  
+const putBillingConcept = async (req, res) => {
+  
   try {   
     const registerSchema = Joi.object({
       nombre: Joi.string().required(),

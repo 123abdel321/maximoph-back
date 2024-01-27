@@ -121,7 +121,8 @@ const createProperty = async (req, res) => {
         return res.status(201).json({ success: false, error: error.message });
         }
 
-        const { id_inmueble_zona, tipo, numero_interno_unidad, area, coeficiente, valor_total_administracion, numero_perros, numero_gatos, observaciones } = req.body;
+        let { id_inmueble_zona, tipo, numero_interno_unidad, area, coeficiente, valor_total_administracion, numero_perros, numero_gatos, observaciones } = req.body;
+        numero_interno_unidad = numero_interno_unidad.toUpperCase();
 
         let pool = poolSys.getPool(req.user.token_db);
 
@@ -242,8 +243,8 @@ const putProperty = async (req, res) => {
         return res.status(201).json({ success: false, error: error.message });
         }
 
-        const { id_inmueble_zona, tipo, numero_interno_unidad, area, coeficiente, valor_total_administracion, numero_perros, numero_gatos, observaciones, id } = req.body;
-
+        let { id_inmueble_zona, tipo, numero_interno_unidad, area, coeficiente, valor_total_administracion, numero_perros, numero_gatos, observaciones, id } = req.body;
+        numero_interno_unidad = numero_interno_unidad.toUpperCase();
         let pool = poolSys.getPool(req.user.token_db);
 
         let editarValorAdmonInmueble = await getSysEnv({
@@ -260,8 +261,7 @@ const putProperty = async (req, res) => {
             name: 'valor_total_presupuesto_year_actual',
             pool: pool
         });
-        console.log('pptoTotal2: ',pptoTotal);
-        console.log('areaTotal2: ',areaTotal);
+
         if (!pptoTotal||!areaTotal) {
             return res.status(201).json({ success: false, error: `Antes de crear inmuebles debes configurar en Utilidades > Entorno, el Área Total y el Presupuesto Anual.` });
         }
