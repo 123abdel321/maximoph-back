@@ -81,7 +81,7 @@ const getAllCyclicalBills = async (req, res) => {
         LEFT OUTER JOIN conceptos_facturacion t7 ON t7.id = t6.id_concepto_factura
       WHERE
         ${validateDate?`(DATE_FORMAT(NOW(),'%Y-%m-%d')>=t1.fecha_inicio OR DATE_FORMAT(NOW(),'%Y-%m-%d')<=t1.fecha_fin)`:'1=1'}
-        ${validateDate?`GROUP BY id_persona, id_inmueble`:''}
+        ${validateDate?`GROUP BY id_persona, id_inmueble, t6.id_concepto_factura`:''}
       ORDER BY t1.id ASC
       `);
 
@@ -159,6 +159,9 @@ const getAllCyclicalBills = async (req, res) => {
         totals.coeficiente_ingresado += Number(coe.coe);
       });
 
+      let [dataCliente] = await pool.query(`SELECT * FROM cli_maximo_ph_admin.clientes WHERE id = ${req.user.id_cliente};`);
+        dataCliente = dataCliente[0];
+
       const [all_concepts] = await pool.query(
           `SELECT 
             t2.nombre AS nombre_concepto, 
@@ -187,7 +190,7 @@ const getAllCyclicalBills = async (req, res) => {
           `,[admonConcept,adminConceptParqueadero,adminConceptCuartoUtil]);
       
       totals.concepts = all_concepts;
-      
+      totals.numero_unidades = dataCliente.numero_unidades;
       totals.valor_total_administracion = admonSumValue[0].total_concepto;
 
     const currentDate = new Date();
