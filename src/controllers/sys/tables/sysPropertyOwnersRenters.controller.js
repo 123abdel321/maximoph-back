@@ -17,7 +17,7 @@ const getAllPropertyOwnersRenters = async (req, res) => {
     const { id_inmueble } = req.params;
 
     let pool = poolSys.getPool(req.user.token_db);
-
+    
     const [propertieOwnersRenters] = await pool.query(
         `SELECT 
             t1.*,
@@ -42,6 +42,7 @@ const getAllPropertyOwnersRenters = async (req, res) => {
 };
 
 const getAllPropertiesByOwnerRenter = async (req, res) => {
+  
   try {
     const registerSchema = Joi.object({
         email: Joi.string().required()
@@ -71,7 +72,7 @@ const getAllPropertiesByOwnerRenter = async (req, res) => {
         INNER JOIN personas t2 ON t2.id = t1.id_persona
         INNER JOIN inmuebles t3 ON t3.id = t1.id_inmueble
         INNER JOIN zonas t4 ON t4.id = t3.id_inmueble_zona
-        WHERE t2.email = ? AND t3.tipo = 0 GROUP BY t1.id_inmueble`,[email]);
+        WHERE t2.email = '${email}' AND t3.tipo = 0 GROUP BY t1.id_inmueble`);
     
     //pool.end();
 

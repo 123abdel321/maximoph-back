@@ -2,12 +2,26 @@ import axios from "axios";
 import { getSysEnv } from "./sysEnviroment.js";
 
 const genExtractCustomerNit = async (tercero, pool, personDateValidate) => {
-  
   try {
     let apiKeyERP = await getSysEnv({
       name: 'api_key_erp',
       pool: pool
     });
+    
+    if (!Number(tercero)) {
+      return {
+        data: [], 
+        porcentajeDescuentoProntoPago: 0,
+        descuentoProntoPago: 0,
+        porcentajeInteresesMora: 0,
+        calculaIntereses: 0,
+        mesActual: 0,
+        diaActual: 0,
+        totalPendiente: 0,
+        totalGlobalDescuento: 0, 
+        totalGlobalIntereses: 0
+      };
+    }
 
     let totalPendiente = 0;
     let totalGlobalDescuento = 0;

@@ -80,6 +80,11 @@ const getAllProperties = async (req, res) => {
                 WHERE t1.eliminado=0`);
             totals = totals[0];
 
+            let [dataCliente] = await pool.query(`SELECT * FROM cli_maximo_ph_admin.clientes WHERE id = ${req.user.id_cliente};`);
+                dataCliente = dataCliente[0];
+
+            totals.numero_unidades = dataCliente.numero_unidades;
+
             properties.map((propertie,pos)=>{
                 propertie.label = `${propertie.zonaText} ${propertie.numero_interno_unidad} -  ${propertie.tipoText}`;
                 propertie.value = propertie.id;
