@@ -212,8 +212,18 @@ const login = async (req, res) => {
         WHERE 
             campo NOT IN ('id_comprobante_ventas_erp', 'id_comprobante_gastos_erp', 'id_comprobante_recibos_caja_erp', 'id_cuenta_intereses_erp')
     `);
+
+    let [dataCliente] = await pool.query(`SELECT * FROM cli_maximo_ph_admin.clientes WHERE id = ${user.id_cliente};`);
+        dataCliente = dataCliente[0];
     
-    
+    // enviromentMaximo.numero_total_unidades = dataCliente.numero_unidades;
+    for (let index = 0; index < enviromentMaximo.length; index++) {
+      const enviroment = enviromentMaximo[index];
+      if (enviroment.campo == "numero_total_unidades") {
+        enviromentMaximo[index].valor = dataCliente.numero_unidades;
+      }
+      
+    }
     const [notifications] = await pool.query(`SELECT * FROM mensajes_push_historia WHERE id_usuario_notificado = ? AND vista=0 ORDER BY created_at DESC`,[user.id]);
     
     user.notifications = notifications;
