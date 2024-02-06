@@ -31,9 +31,9 @@ class poolSysCls {
       });
     }
 
-    setTimeout(function(){
-      this.connectionPools[dbName].end();
-    },90000);
+    // setTimeout(function(){
+    //   this.connectionPools[dbName].end();
+    // },90000);
 
     return this.connectionPools[dbName];
   }
