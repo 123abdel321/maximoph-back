@@ -26,8 +26,8 @@ class poolSysCls {
         port: process.env.DB_PORT,
         database: `${process.env.DB_DATABASE_SYSTEM_PREFIX}_${dbName}`,
         multipleStatements: true,
-        idleTimeoutMillis: 90000,
-        connectionLimit: 120
+        idleTimeoutMillis: 9000,
+        connectionLimit: 2000
       });
     }
 
