@@ -27,7 +27,7 @@ class poolSysCls {
         database: `${process.env.DB_DATABASE_SYSTEM_PREFIX}_${dbName}`,
         multipleStatements: true,
         idleTimeoutMillis: 9000,
-        connectionLimit: 2000
+        connectionLimit: 1000000000
       });
     }
 
