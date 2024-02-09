@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `activos_fijos` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_inmueble_zona` int DEFAULT NULL,
   `nombre` varchar(100) DEFAULT NULL,
   `created_by` int DEFAULT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE `activos_fijos` (
 --
 
 CREATE TABLE `conceptos_facturacion` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_cuenta_ingreso_erp` int NOT NULL,
   `id_cuenta_interes_erp` int DEFAULT NULL,
   `id_cuenta_iva_erp` int DEFAULT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE `conceptos_facturacion` (
 --
 
 CREATE TABLE `conceptos_gastos` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_cuenta_gasto_erp` int NOT NULL,
   `id_cuenta_iva_erp` int DEFAULT NULL,
   `porcentaje_iva` int NOT NULL DEFAULT '0',
@@ -89,7 +89,7 @@ CREATE TABLE `conceptos_gastos` (
 --
 
 CREATE TABLE `control_ingresos` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_persona_autoriza` int DEFAULT NULL,
   `id_inmueble` int DEFAULT NULL,
   `id_inmueble_zona` int DEFAULT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE `control_ingresos` (
 --
 
 CREATE TABLE `correos_enviados` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `tipo` int NOT NULL COMMENT '0 - INSTALACION, 1 - FACTURAS',
   `id_data` int NOT NULL,
   `correo_electronico` varchar(100) DEFAULT NULL,
@@ -134,7 +134,7 @@ CREATE TABLE `correos_enviados` (
 --
 
 CREATE TABLE `entorno` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `campo` varchar(100) NOT NULL,
   `valor` varchar(500) DEFAULT NULL,
   `created_by` int DEFAULT NULL,
@@ -193,7 +193,7 @@ INSERT INTO `entorno` (`id`, `campo`, `valor`, `created_by`, `created_at`, `upda
 --
 
 CREATE TABLE `erp_maestras` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `tipo` int NOT NULL DEFAULT '0' COMMENT '0 - CENTRO DE COSTOS, 1 - COMPROBANTE, 2 - CUENTA, 3 - CIUDAD',
   `id_erp` int DEFAULT NULL,
   `codigo` varchar(25) DEFAULT NULL,
@@ -211,7 +211,7 @@ CREATE TABLE `erp_maestras` (
 --
 
 CREATE TABLE `facturas` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_persona` int NOT NULL,
   `id_inmueble` int DEFAULT NULL,
   `consecutivo` varchar(20) DEFAULT NULL,
@@ -233,7 +233,7 @@ CREATE TABLE `facturas` (
 --
 
 CREATE TABLE `facturas_ciclica` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_inmueble` int NOT NULL,
   `id_persona` int DEFAULT NULL,
   `fecha_inicio` date DEFAULT NULL,
@@ -253,7 +253,7 @@ CREATE TABLE `facturas_ciclica` (
 --
 
 CREATE TABLE `factura_ciclica_detalles` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_factura_ciclica` int NOT NULL,
   `id_concepto_factura` int NOT NULL,
   `cantidad` int NOT NULL DEFAULT '1',
@@ -273,7 +273,7 @@ CREATE TABLE `factura_ciclica_detalles` (
 --
 
 CREATE TABLE `factura_ciclica_historial` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `valor_total` varchar(150) NOT NULL,
   `estado` int DEFAULT '1' COMMENT '0 - ANULADO, 1 - GENERADO',
   `created_by` int DEFAULT NULL,
@@ -289,7 +289,7 @@ CREATE TABLE `factura_ciclica_historial` (
 --
 
 CREATE TABLE `factura_ciclica_historial_detalle` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_factura_ciclica` int NOT NULL,
   `id_factura` int NOT NULL,
   `total` varchar(150) NOT NULL DEFAULT '0',
@@ -306,7 +306,7 @@ CREATE TABLE `factura_ciclica_historial_detalle` (
 --
 
 CREATE TABLE `factura_detalles` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_factura` int NOT NULL,
   `id_inmueble` int DEFAULT NULL,
   `id_concepto_factura` int NOT NULL,
@@ -327,7 +327,7 @@ CREATE TABLE `factura_detalles` (
 --
 
 CREATE TABLE `factura_recibos_caja` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `consecutivo` int NOT NULL,
   `id_persona` int NOT NULL,
   `fecha_recibo` date DEFAULT NULL,
@@ -348,7 +348,7 @@ CREATE TABLE `factura_recibos_caja` (
 --
 
 CREATE TABLE `factura_recibo_caja_comprobante` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_persona` int NOT NULL,
   `id_recibo_caja` int DEFAULT NULL,
   `fecha` date NOT NULL,
@@ -368,7 +368,7 @@ CREATE TABLE `factura_recibo_caja_comprobante` (
 --
 
 CREATE TABLE `gastos` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_persona_proveedor` int NOT NULL,
   `id_cuenta_x_pagar_egreso_gasto_erp` int DEFAULT NULL,
   `consecutivo` int DEFAULT NULL,
@@ -395,7 +395,7 @@ CREATE TABLE `gastos` (
 --
 
 CREATE TABLE `gasto_detalle` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_gasto` int NOT NULL,
   `id_concepto_gasto` int NOT NULL,
   `id_centro_costos_erp` varchar(100) DEFAULT NULL,
@@ -419,7 +419,7 @@ CREATE TABLE `gasto_detalle` (
 --
 
 CREATE TABLE `gasto_pagos` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `consecutivo` int NOT NULL,
   `id_persona` int NOT NULL,
   `fecha_pago` date DEFAULT NULL,
@@ -440,7 +440,7 @@ CREATE TABLE `gasto_pagos` (
 --
 
 CREATE TABLE `importador_historia` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_modulo` int NOT NULL,
   `archivo` varchar(500) NOT NULL,
   `peso` varchar(10) NOT NULL,
@@ -457,7 +457,7 @@ CREATE TABLE `importador_historia` (
 --
 
 CREATE TABLE `inmuebles` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_inmueble_zona` int DEFAULT NULL,
   `tipo` int NOT NULL DEFAULT '0' COMMENT '0 - Inmueble, 1 - Parqueadero, 2 - Cuarto Util',
   `numero_interno_unidad` varchar(50) DEFAULT NULL,
@@ -481,7 +481,7 @@ CREATE TABLE `inmuebles` (
 --
 
 CREATE TABLE `inmueble_mascotas` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_inmueble` int NOT NULL,
   `tipo` int NOT NULL DEFAULT '2' COMMENT '0 - CANINO, 1 - FELINO, 2 - OTRO',
   `nombre` varchar(255) DEFAULT NULL,
@@ -500,7 +500,7 @@ CREATE TABLE `inmueble_mascotas` (
 --
 
 CREATE TABLE `inmueble_personas_admon` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_inmueble` int NOT NULL,
   `id_persona` int DEFAULT NULL,
   `tipo` tinyint NOT NULL DEFAULT '0' COMMENT '0 - PROPIETARIO, 1 - INQUILINO',
@@ -523,7 +523,7 @@ CREATE TABLE `inmueble_personas_admon` (
 --
 
 CREATE TABLE `inmueble_personas_visitantes` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_inmueble` int NOT NULL,
   `id_persona_autoriza` int NOT NULL,
   `persona_visitante` varchar(500) DEFAULT NULL,
@@ -544,7 +544,7 @@ CREATE TABLE `inmueble_personas_visitantes` (
 --
 
 CREATE TABLE `inmueble_vehiculos` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_inmueble` int NOT NULL,
   `id_tipo_vehiculo` int NOT NULL,
   `id_persona_autoriza` int NOT NULL,
@@ -566,7 +566,7 @@ CREATE TABLE `inmueble_vehiculos` (
 --
 
 CREATE TABLE `logs` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_modulo` int NOT NULL,
   `tipo_operacion` varchar(25) NOT NULL COMMENT '0 - CREATE, 1 - UPDATE, 2 - DELETE, 3 - LOGIN, 4 - LOGOUT',
   `descripcion` varchar(255) DEFAULT NULL,
@@ -584,7 +584,7 @@ CREATE TABLE `logs` (
 --
 
 CREATE TABLE `maestras_base` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `tipo` int NOT NULL DEFAULT '0' COMMENT '0 - ROL, 1 - ACTIVIDAD PROVEEDOR, 2 - TIPO VEHICULO, 3 - CONCEPTO VISITA, 4 - TIPO TAREA, 5 - MODULO',
   `nombre` varchar(50) NOT NULL,
   `descripcion` text,
@@ -630,7 +630,7 @@ INSERT INTO `maestras_base` (`id`, `tipo`, `nombre`, `descripcion`, `eliminado`,
 --
 
 CREATE TABLE `mensajes` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_zona` int DEFAULT NULL,
   `id_persona` int DEFAULT NULL,
   `id_rol_persona` int DEFAULT NULL,
@@ -650,7 +650,7 @@ CREATE TABLE `mensajes` (
 --
 
 CREATE TABLE `mensajes_historico` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_persona_notificada` int DEFAULT NULL,
   `id_rol_notificado` int DEFAULT NULL,
   `id_inmueble_zona` int DEFAULT NULL,
@@ -671,7 +671,7 @@ CREATE TABLE `mensajes_historico` (
 --
 
 CREATE TABLE `mensajes_push_historia` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_usuario_notificado` int NOT NULL,
   `titulo` varchar(250) NOT NULL,
   `vista` tinyint NOT NULL COMMENT '0 - NO, 1 - SI',
@@ -689,7 +689,7 @@ CREATE TABLE `mensajes_push_historia` (
 --
 
 CREATE TABLE `multimedia` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `tipo` int NOT NULL COMMENT '0 - PERSONAS, 1 - PERSONAS VISITANTES, 2 - VEHICULOS, 3 - PQRSF, 4 - TAREAS, 5 - COMPROBANTE RECIBO CAJA, 6 - MASCOTAS',
   `id_registro` int NOT NULL,
   `nombre` varchar(100) NOT NULL,
@@ -708,7 +708,7 @@ CREATE TABLE `multimedia` (
 --
 
 CREATE TABLE `personas` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_tercero_erp` int DEFAULT NULL,
   `id_ciudad_erp` int DEFAULT NULL,
   `tipo_documento` int NOT NULL DEFAULT '0' COMMENT '0 - CÉDULA 1 - NIT',
@@ -739,7 +739,7 @@ CREATE TABLE `personas` (
 --
 
 CREATE TABLE `personas_roles` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_persona` int NOT NULL,
   `id_rol` int NOT NULL,
   `created_by` int DEFAULT NULL,
@@ -762,7 +762,7 @@ INSERT INTO `personas_roles` (`id`, `id_persona`, `id_rol`, `created_by`, `creat
 --
 
 CREATE TABLE `pqrsf` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_inmueble` int DEFAULT NULL,
   `id_persona` int DEFAULT NULL,
   `tipo` tinyint NOT NULL COMMENT '0 - Pregunta, 1 - Queja, 2 - Reclamo, 3 - Solicitud, 4 - Felicitacion',
@@ -781,7 +781,7 @@ CREATE TABLE `pqrsf` (
 --
 
 CREATE TABLE `presupuesto_anual` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `year` varchar(100) DEFAULT NULL,
   `valor_presupuesto` varchar(150) DEFAULT NULL,
   `created_by` int DEFAULT NULL,
@@ -797,7 +797,7 @@ CREATE TABLE `presupuesto_anual` (
 --
 
 CREATE TABLE `proveedores` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_persona` int DEFAULT NULL,
   `id_actividad` int DEFAULT NULL,
   `nombre_negocio` varchar(250) NOT NULL,
@@ -815,7 +815,7 @@ CREATE TABLE `proveedores` (
 --
 
 CREATE TABLE `tareas` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `id_tipo_tarea` int NOT NULL,
   `fecha_programada_inicial` datetime DEFAULT NULL,
   `fecha_programada_final` datetime DEFAULT NULL,
@@ -842,7 +842,7 @@ CREATE TABLE `tareas` (
 --
 
 CREATE TABLE `zonas` (
-  `id` int NOT NULL,
+  `id` int NOT NULL PRIMARY KEY,
   `nombre` varchar(50) NOT NULL,
   `tipo` int NOT NULL DEFAULT '0' COMMENT '0-Uso común, 1-Inmueble, 2-Porteria',
   `id_centro_costos_erp` int DEFAULT NULL,
@@ -860,30 +860,24 @@ CREATE TABLE `zonas` (
 -- Indexes for table `activos_fijos`
 --
 ALTER TABLE `activos_fijos`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_inmueble_zona` (`id_inmueble_zona`);
 
 --
 -- Indexes for table `conceptos_facturacion`
 --
 ALTER TABLE `conceptos_facturacion`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_cuenta_ingreso_erp` (`id_cuenta_ingreso_erp`),
   ADD KEY `id_cuenta_interes_erp` (`id_cuenta_interes_erp`),
   ADD KEY `id_cuenta_iva_erp` (`id_cuenta_iva_erp`),
   ADD KEY `id_cuenta_por_cobrar` (`id_cuenta_por_cobrar`);
 
 --
--- Indexes for table `conceptos_gastos`
---
-ALTER TABLE `conceptos_gastos`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `control_ingresos`
 --
 ALTER TABLE `control_ingresos`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_persona_autoriza` (`id_persona_autoriza`),
   ADD KEY `id_inmueble` (`id_inmueble`),
   ADD KEY `id_inmueble_zona` (`id_inmueble_zona`),
@@ -891,22 +885,10 @@ ALTER TABLE `control_ingresos`
   ADD KEY `id_tipo_vehiculo` (`id_tipo_vehiculo`);
 
 --
--- Indexes for table `correos_enviados`
---
-ALTER TABLE `correos_enviados`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `entorno`
---
-ALTER TABLE `entorno`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `erp_maestras`
 --
 ALTER TABLE `erp_maestras`
-  ADD PRIMARY KEY (`id`),
+  
   ADD UNIQUE KEY `tipo` (`tipo`,`id_erp`),
   ADD UNIQUE KEY `tipo_2` (`tipo`,`codigo`),
   ADD UNIQUE KEY `tipo_3` (`tipo`,`id_erp`);
@@ -915,35 +897,29 @@ ALTER TABLE `erp_maestras`
 -- Indexes for table `facturas`
 --
 ALTER TABLE `facturas`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_persona` (`id_persona`);
 
 --
 -- Indexes for table `facturas_ciclica`
 --
 ALTER TABLE `facturas_ciclica`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_persona` (`id_inmueble`);
 
 --
 -- Indexes for table `factura_ciclica_detalles`
 --
 ALTER TABLE `factura_ciclica_detalles`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_factura_ciclica` (`id_factura_ciclica`),
   ADD KEY `id_concepto_factura` (`id_concepto_factura`);
-
---
--- Indexes for table `factura_ciclica_historial`
---
-ALTER TABLE `factura_ciclica_historial`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `factura_ciclica_historial_detalle`
 --
 ALTER TABLE `factura_ciclica_historial_detalle`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_factura_ciclica` (`id_factura_ciclica`),
   ADD KEY `id_factura` (`id_factura`);
 
@@ -951,34 +927,22 @@ ALTER TABLE `factura_ciclica_historial_detalle`
 -- Indexes for table `factura_detalles`
 --
 ALTER TABLE `factura_detalles`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_factura` (`id_factura`),
   ADD KEY `id_concepto_factura` (`id_concepto_factura`);
-
---
--- Indexes for table `factura_recibos_caja`
---
-ALTER TABLE `factura_recibos_caja`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `factura_recibo_caja_comprobante`
---
-ALTER TABLE `factura_recibo_caja_comprobante`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `gastos`
 --
 ALTER TABLE `gastos`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_persona` (`id_persona_proveedor`);
 
 --
 -- Indexes for table `gasto_detalle`
 --
 ALTER TABLE `gasto_detalle`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_gasto` (`id_gasto`),
   ADD KEY `id_concepto_gasto` (`id_concepto_gasto`);
 
@@ -986,42 +950,42 @@ ALTER TABLE `gasto_detalle`
 -- Indexes for table `gasto_pagos`
 --
 ALTER TABLE `gasto_pagos`
-  ADD PRIMARY KEY (`id`),
+  
   ADD UNIQUE KEY `id_UNIQUE` (`id`);
 
 --
 -- Indexes for table `importador_historia`
 --
 ALTER TABLE `importador_historia`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_modulo` (`id_modulo`);
 
 --
 -- Indexes for table `inmuebles`
 --
 ALTER TABLE `inmuebles`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_inmueble_zona` (`id_inmueble_zona`);
 
 --
 -- Indexes for table `inmueble_mascotas`
 --
 ALTER TABLE `inmueble_mascotas`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `idx_id_inmueble` (`id_inmueble`);
 
 --
 -- Indexes for table `inmueble_personas_admon`
 --
 ALTER TABLE `inmueble_personas_admon`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_inmueble` (`id_inmueble`);
 
 --
 -- Indexes for table `inmueble_personas_visitantes`
 --
 ALTER TABLE `inmueble_personas_visitantes`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_inmueble` (`id_inmueble`),
   ADD KEY `id_persona_autoriza` (`id_persona_autoriza`);
 
@@ -1029,7 +993,7 @@ ALTER TABLE `inmueble_personas_visitantes`
 -- Indexes for table `inmueble_vehiculos`
 --
 ALTER TABLE `inmueble_vehiculos`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_inmueble` (`id_inmueble`),
   ADD KEY `id_tipo_vehiculo` (`id_tipo_vehiculo`),
   ADD KEY `id_persona_autoriza` (`id_persona_autoriza`);
@@ -1038,26 +1002,14 @@ ALTER TABLE `inmueble_vehiculos`
 -- Indexes for table `logs`
 --
 ALTER TABLE `logs`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_modulo` (`id_modulo`);
-
---
--- Indexes for table `maestras_base`
---
-ALTER TABLE `maestras_base`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `mensajes`
---
-ALTER TABLE `mensajes`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `mensajes_historico`
 --
 ALTER TABLE `mensajes_historico`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_persona_notificada` (`id_persona_notificada`),
   ADD KEY `id_rol_notificado` (`id_rol_notificado`),
   ADD KEY `id_inmueble_zona` (`id_inmueble_zona`),
@@ -1067,26 +1019,14 @@ ALTER TABLE `mensajes_historico`
 -- Indexes for table `mensajes_push_historia`
 --
 ALTER TABLE `mensajes_push_historia`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_persona_notificada` (`id_usuario_notificado`);
-
---
--- Indexes for table `multimedia`
---
-ALTER TABLE `multimedia`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `personas`
---
-ALTER TABLE `personas`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `personas_roles`
 --
 ALTER TABLE `personas_roles`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_rol` (`id_rol`),
   ADD KEY `id_persona` (`id_persona`);
 
@@ -1094,21 +1034,15 @@ ALTER TABLE `personas_roles`
 -- Indexes for table `pqrsf`
 --
 ALTER TABLE `pqrsf`
-  ADD PRIMARY KEY (`id`),
+  
   ADD UNIQUE KEY `id_UNIQUE` (`id`),
   ADD KEY `id_INDEX` (`id`);
-
---
--- Indexes for table `presupuesto_anual`
---
-ALTER TABLE `presupuesto_anual`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `proveedores`
 --
 ALTER TABLE `proveedores`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_persona` (`id_persona`),
   ADD KEY `id_actividad` (`id_actividad`);
 
@@ -1116,17 +1050,11 @@ ALTER TABLE `proveedores`
 -- Indexes for table `tareas`
 --
 ALTER TABLE `tareas`
-  ADD PRIMARY KEY (`id`),
+  
   ADD KEY `id_tipo_tarea` (`id_tipo_tarea`),
   ADD KEY `id_persona_responsable` (`id_usuario_responsable`),
   ADD KEY `id_inmueble` (`id_inmueble`),
   ADD KEY `id_inmueble_zona` (`id_inmueble_zona`);
-
---
--- Indexes for table `zonas`
---
-ALTER TABLE `zonas`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables

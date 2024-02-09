@@ -1,7 +1,9 @@
 import fs from "fs";
 import Joi  from "joi";
+import axios from "axios";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { updateSysEnv, getSysEnv } from "../../helpers/sysEnviroment.js";
 import { poolAdm, poolSys } from "../../db.js";
 import { getRolePermissions } from "../../helpers/getRolePermissions.js";
 
@@ -56,6 +58,7 @@ const createDBName = (name)=>{
 }
 
 const createClient = async (req, res) => {
+  
   try {  
     multer({ storage }).single('image')(req, res, async(err) => {
       if (err) {
@@ -83,7 +86,7 @@ const createClient = async (req, res) => {
         valor_suscripcion_mensual: Joi.number().required(),
         password: Joi.string().required()
       });
-
+      
       //VALIDATE FORMAT FIELDS
       const { error } = clientSchema.validate(req.body);
       if (error) {
@@ -109,7 +112,6 @@ const createClient = async (req, res) => {
       }
 
       const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
       const sqlFilePath = path.join(__dirname, '../../../db/maximo_ph.sql');
       let sqlFileContent = fs.readFileSync(sqlFilePath, 'utf-8');
 
@@ -220,6 +222,31 @@ const createClient = async (req, res) => {
 
       newAdminUser.permissions = permissions;
 
+      const instance = axios.create({
+        baseURL: `${process.env.URL_API_ERP}`,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      var api_key_token = await instance.post(`register-api-token`, JSON.stringify({
+        tipo_documento: tipo_documento,
+        numero_documento: numero_documento,
+        razon_social: razon_social,
+        nombres: nombres,
+        telefono: telefono,
+        direccion: direccion,
+        correo: correo,
+        password: password
+      }));
+      api_key_token = api_key_token.data.api_key_token;
+
+      await updateSysEnv({
+          name: 'api_key_erp',
+          val: api_key_token,
+          pool: pool
+      });
+
       const template = welcomeEmailTemplate(razon_social, correo, numero_documento);
 
       const to = [
@@ -230,7 +257,7 @@ const createClient = async (req, res) => {
         },
       ];
 
-      await sendMail("Máximo PH", "Máximo PH - Nueva Cuenta", template, to);
+      // await sendMail("Máximo PH", "Máximo PH - Nueva Cuenta", template, to);
       
       //poolAdmin.end();
       //pool.end();
