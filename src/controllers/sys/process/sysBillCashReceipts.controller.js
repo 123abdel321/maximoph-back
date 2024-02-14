@@ -123,7 +123,8 @@ const createBillCashReceiptProcess = async (data, pool, req) => {
       cxcIdErpDescuento = cxcIdErpDescuento[0].id_cuenta_descuento_erp;
 
     let [reciboComprobanteErp] = await pool.query(`SELECT t2.id_erp FROM entorno t1 INNER JOIN erp_maestras t2 ON t2.id = t1.valor WHERE t1.campo='id_comprobante_recibos_caja_erp'`);
-      reciboComprobanteErp = reciboComprobanteErp[0].id_erp;
+      // reciboComprobanteErp = reciboComprobanteErp[0].id_erp;
+      reciboComprobanteErp = 4; //QUEMADO
 
     if(cuentaAnticipos){
       [cuentaAnticipos] = await pool.query(`SELECT t2.id_erp FROM entorno t1 INNER JOIN erp_maestras t2 ON t2.id = t1.valor WHERE t1.campo='id_cuenta_anticipos_erp'`);
@@ -400,11 +401,16 @@ const createBillCashReceiptAnticipos = async (req, res) => {
       pool: pool
     });
 
+    let periodoFacturacion = await getSysEnv({
+      name: 'periodo_facturacion',
+      pool: pool
+    });
+
     if(cuentaAnticipos){
       let [bills] = await pool.query(`SELECT 
           t2.id_persona,
           t5.id_tercero_erp,
-          DATE_FORMAT(NOW(),"%Y-%m-%d") AS fecha_recibo,
+          DATE_ADD("${periodoFacturacion}", INTERVAL -1 MONTH) AS fecha_recibo,
           IFNULL(t2.total_anticipos,0) AS valor_recibo,
           0 AS intereses,
           0 AS descuento_pronto_pago,
